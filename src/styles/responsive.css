@@ -1,1 +1,942 @@
- 
+/* src/styles/responsive.css */
+
+/* ============================================================================
+   RESPONSIVE BREAKPOINT MIXINS (Using Media Queries)
+   ============================================================================ */
+
+/* Mobile First Approach */
+/* Base styles are for mobile (320px+) */
+/* Then we progressively enhance for larger screens */
+
+/* ============================================================================
+   MOBILE STYLES (Base - 320px to 639px)
+   ============================================================================ */
+
+/* Dashboard Layout for Mobile */
+@media (max-width: 639px) {
+  .dashboard-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: var(--header-height) 1fr;
+    grid-template-areas: 
+      "header"
+      "main";
+  }
+  
+  .dashboard-sidebar {
+    position: fixed;
+    top: var(--header-height);
+    left: 0;
+    bottom: 0;
+    width: var(--sidebar-width);
+    transform: translateX(-100%);
+    transition: transform var(--transition-normal);
+    z-index: var(--z-modal);
+    box-shadow: var(--shadow-xl);
+  }
+  
+  .dashboard-sidebar.open {
+    transform: translateX(0);
+  }
+  
+  .sidebar-overlay {
+    position: fixed;
+    top: var(--header-height);
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--bg-overlay);
+    z-index: var(--z-modal-backdrop);
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--transition-normal);
+  }
+  
+  .sidebar-overlay.open {
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  .sidebar-toggle {
+    display: flex !important;
+  }
+  
+  /* Header adjustments */
+  .dashboard-header {
+    padding: 0 var(--spacing-4);
+  }
+  
+  .header-title {
+    font-size: var(--font-size-lg);
+  }
+  
+  .header-actions {
+    gap: var(--spacing-1);
+  }
+  
+  /* Main content adjustments */
+  .dashboard-main {
+    padding: var(--spacing-4);
+  }
+  
+  /* Grid system adjustments */
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-4);
+  }
+  
+  .col-1, .col-2, .col-3, .col-4, .col-5, .col-6,
+  .col-7, .col-8, .col-9, .col-10, .col-11, .col-12 {
+    grid-column: span 1;
+  }
+  
+  /* KPI Grid */
+  .kpi-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-3);
+  }
+  
+  /* Chart Grid */
+  .chart-grid,
+  .chart-grid-2,
+  .chart-grid-3 {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-4);
+  }
+  
+  /* Chart containers */
+  .chart-container {
+    padding: var(--spacing-4);
+  }
+  
+  .chart-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-2);
+  }
+  
+  .chart-title {
+    font-size: var(--font-size-base);
+  }
+  
+  .chart-actions {
+    align-self: stretch;
+    justify-content: flex-end;
+  }
+  
+  .chart-body {
+    min-height: 250px;
+  }
+  
+  /* Filter Panel */
+  .filter-panel {
+    padding: var(--spacing-3);
+  }
+  
+  .filter-panel-content {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-3);
+  }
+  
+  .filter-panel-actions {
+    flex-direction: column;
+    gap: var(--spacing-2);
+  }
+  
+  /* Data Table */
+  .data-table-header {
+    flex-direction: column;
+    gap: var(--spacing-3);
+    align-items: stretch;
+  }
+  
+  .data-table-search {
+    width: 100%;
+  }
+  
+  .data-table-toolbar {
+    flex-direction: column;
+    gap: var(--spacing-2);
+    align-items: stretch;
+  }
+  
+  .data-table-toolbar .toolbar-left,
+  .data-table-toolbar .toolbar-right {
+    justify-content: space-between;
+    margin-left: 0;
+  }
+  
+  .data-table-pagination {
+    flex-direction: column;
+    gap: var(--spacing-2);
+    align-items: stretch;
+  }
+  
+  .pagination-controls {
+    justify-content: center;
+    margin-left: 0;
+  }
+  
+  /* Table responsive scroll */
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .table {
+    min-width: 600px;
+  }
+  
+  /* Forms */
+  .form-group {
+    margin-bottom: var(--spacing-3);
+  }
+  
+  /* Buttons */
+  .btn {
+    font-size: var(--font-size-sm);
+    padding: var(--spacing-2) var(--spacing-3);
+  }
+  
+  .btn-lg {
+    padding: var(--spacing-3) var(--spacing-4);
+    font-size: var(--font-size-base);
+  }
+  
+  /* Cards */
+  .card-header,
+  .card-body,
+  .card-footer {
+    padding: var(--spacing-4);
+  }
+  
+  .kpi-card {
+    padding: var(--spacing-4);
+  }
+  
+  .kpi-value {
+    font-size: var(--font-size-2xl);
+  }
+  
+  /* Modals */
+  .modal {
+    max-width: 95vw;
+    margin: var(--spacing-2);
+  }
+  
+  .modal-header,
+  .modal-body,
+  .modal-footer {
+    padding: var(--spacing-4);
+  }
+  
+  .modal-footer {
+    flex-direction: column-reverse;
+    gap: var(--spacing-2);
+  }
+  
+  /* Admin Panel */
+  .admin-panel-header,
+  .admin-panel-body {
+    padding: var(--spacing-4);
+  }
+  
+  .data-management-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .file-upload-area {
+    padding: var(--spacing-4);
+  }
+  
+  .file-upload-icon {
+    width: 2rem;
+    height: 2rem;
+  }
+  
+  .file-upload-text {
+    font-size: var(--font-size-base);
+  }
+  
+  /* Overview Dashboard */
+  .overview-summary {
+    padding: var(--spacing-4);
+  }
+  
+  .overview-title {
+    font-size: var(--font-size-2xl);
+  }
+  
+  .overview-subtitle {
+    font-size: var(--font-size-base);
+  }
+  
+  .overview-metrics {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-3);
+    margin-top: var(--spacing-4);
+  }
+  
+  /* Export Options */
+  .export-options {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-3);
+  }
+  
+  /* Utility Classes for Tablet */
+  .hidden-tablet {
+    display: none !important;
+  }
+  
+  .block-tablet {
+    display: block !important;
+  }
+  
+  .flex-tablet {
+    display: flex !important;
+  }
+}
+
+/* ============================================================================
+   DESKTOP STYLES (768px to 1023px)
+   ============================================================================ */
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  /* Sidebar adjustments for smaller desktop */
+  .dashboard-layout.sidebar-collapsed {
+    grid-template-columns: var(--sidebar-width-collapsed) 1fr;
+  }
+  
+  /* Grid adjustments for desktop */
+  .col-md-1 { grid-column: span 1; }
+  .col-md-2 { grid-column: span 2; }
+  .col-md-3 { grid-column: span 3; }
+  .col-md-4 { grid-column: span 4; }
+  .col-md-5 { grid-column: span 5; }
+  .col-md-6 { grid-column: span 6; }
+  .col-md-7 { grid-column: span 7; }
+  .col-md-8 { grid-column: span 8; }
+  .col-md-9 { grid-column: span 9; }
+  .col-md-10 { grid-column: span 10; }
+  .col-md-11 { grid-column: span 11; }
+  .col-md-12 { grid-column: span 12; }
+  
+  /* KPI Grid for desktop */
+  .kpi-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  /* Chart Grid for desktop */
+  .chart-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .chart-grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .chart-grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  /* Filter panel for desktop */
+  .filter-panel-content {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  /* Data management grid */
+  .data-management-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  /* Export options */
+  .export-options {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  /* Overview metrics */
+  .overview-metrics {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  /* Table adjustments */
+  .data-table-header {
+    flex-direction: row;
+    align-items: center;
+  }
+  
+  .data-table-search {
+    width: 300px;
+  }
+  
+  .data-table-toolbar {
+    flex-direction: row;
+    align-items: center;
+  }
+  
+  .data-table-toolbar .toolbar-right {
+    margin-left: auto;
+  }
+  
+  .data-table-pagination {
+    flex-direction: row;
+    align-items: center;
+  }
+  
+  .pagination-controls {
+    margin-left: auto;
+  }
+  
+  /* Utility Classes for Desktop */
+  .hidden-desktop {
+    display: none !important;
+  }
+  
+  .block-desktop {
+    display: block !important;
+  }
+  
+  .flex-desktop {
+    display: flex !important;
+  }
+}
+
+/* ============================================================================
+   LARGE DESKTOP STYLES (1024px to 1279px)
+   ============================================================================ */
+
+@media (min-width: 1024px) and (max-width: 1279px) {
+  /* Grid adjustments for large desktop */
+  .col-lg-1 { grid-column: span 1; }
+  .col-lg-2 { grid-column: span 2; }
+  .col-lg-3 { grid-column: span 3; }
+  .col-lg-4 { grid-column: span 4; }
+  .col-lg-5 { grid-column: span 5; }
+  .col-lg-6 { grid-column: span 6; }
+  .col-lg-7 { grid-column: span 7; }
+  .col-lg-8 { grid-column: span 8; }
+  .col-lg-9 { grid-column: span 9; }
+  .col-lg-10 { grid-column: span 10; }
+  .col-lg-11 { grid-column: span 11; }
+  .col-lg-12 { grid-column: span 12; }
+  
+  /* KPI Grid for large desktop */
+  .kpi-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  /* Chart Grid for large desktop */
+  .chart-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .chart-grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .chart-grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  /* Filter panel for large desktop */
+  .filter-panel-content {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  /* Data management grid */
+  .data-management-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  /* Export options */
+  .export-options {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  /* Overview metrics */
+  .overview-metrics {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  /* Utility Classes for Large Desktop */
+  .hidden-lg {
+    display: none !important;
+  }
+  
+  .block-lg {
+    display: block !important;
+  }
+  
+  .flex-lg {
+    display: flex !important;
+  }
+}
+
+/* ============================================================================
+   EXTRA LARGE DESKTOP STYLES (1280px+)
+   ============================================================================ */
+
+@media (min-width: 1280px) {
+  /* Grid adjustments for extra large desktop */
+  .col-xl-1 { grid-column: span 1; }
+  .col-xl-2 { grid-column: span 2; }
+  .col-xl-3 { grid-column: span 3; }
+  .col-xl-4 { grid-column: span 4; }
+  .col-xl-5 { grid-column: span 5; }
+  .col-xl-6 { grid-column: span 6; }
+  .col-xl-7 { grid-column: span 7; }
+  .col-xl-8 { grid-column: span 8; }
+  .col-xl-9 { grid-column: span 9; }
+  .col-xl-10 { grid-column: span 10; }
+  .col-xl-11 { grid-column: span 11; }
+  .col-xl-12 { grid-column: span 12; }
+  
+  /* KPI Grid for extra large desktop */
+  .kpi-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+  
+  /* Chart Grid for extra large desktop */
+  .chart-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .chart-grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .chart-grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  /* Filter panel for extra large desktop */
+  .filter-panel-content {
+    grid-template-columns: repeat(5, 1fr);
+  }
+  
+  /* Data management grid */
+  .data-management-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  /* Export options */
+  .export-options {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  /* Overview metrics */
+  .overview-metrics {
+    grid-template-columns: repeat(5, 1fr);
+  }
+  
+  /* Utility Classes for Extra Large Desktop */
+  .hidden-xl {
+    display: none !important;
+  }
+  
+  .block-xl {
+    display: block !important;
+  }
+  
+  .flex-xl {
+    display: flex !important;
+  }
+}
+
+/* ============================================================================
+   LANDSCAPE ORIENTATION SPECIFIC STYLES
+   ============================================================================ */
+
+@media (orientation: landscape) and (max-height: 500px) {
+  /* Adjustments for landscape mobile devices */
+  .dashboard-header {
+    height: 3rem;
+  }
+  
+  :root {
+    --header-height: 3rem;
+  }
+  
+  .chart-body {
+    min-height: 200px;
+  }
+  
+  .chart-lg .chart-body,
+  .chart-xl .chart-body {
+    min-height: 250px;
+  }
+  
+  .modal {
+    max-height: 80vh;
+  }
+  
+  .overview-summary {
+    padding: var(--spacing-4);
+  }
+  
+  .overview-title {
+    font-size: var(--font-size-xl);
+  }
+}
+
+/* ============================================================================
+   HIGH DPI DISPLAYS (RETINA)
+   ============================================================================ */
+
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  /* Enhance visual quality for high DPI displays */
+  .chart-container,
+  .kpi-card,
+  .card {
+    border-width: 0.5px;
+  }
+  
+  .table th,
+  .table td {
+    border-width: 0.5px;
+  }
+  
+  /* Ensure crisp icons and images */
+  .nav-icon,
+  .chart-action-btn,
+  .sidebar-logo-icon {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+/* ============================================================================
+   REDUCED MOTION PREFERENCES
+   ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .animate-spin,
+  .animate-pulse,
+  .animate-bounce {
+    animation: none;
+  }
+}
+
+/* ============================================================================
+   DARK MODE RESPONSIVE ADJUSTMENTS
+   ============================================================================ */
+
+@media (prefers-color-scheme: dark) {
+  [data-theme="auto"] {
+    --bg-primary: var(--color-gray-900);
+    --bg-secondary: var(--color-gray-800);
+    --bg-tertiary: var(--color-gray-700);
+    --bg-card: var(--color-gray-800);
+    --bg-sidebar: var(--color-gray-900);
+    --bg-header: var(--color-gray-800);
+
+    --text-primary: var(--color-gray-100);
+    --text-secondary: var(--color-gray-300);
+    --text-tertiary: var(--color-gray-400);
+
+    --border-primary: var(--color-gray-700);
+    --border-secondary: var(--color-gray-600);
+  }
+}
+
+/* ============================================================================
+   PRINT RESPONSIVE STYLES
+   ============================================================================ */
+
+@media print {
+  .dashboard-layout {
+    grid-template-columns: 1fr !important;
+    grid-template-areas: "main" !important;
+  }
+  
+  .dashboard-sidebar,
+  .dashboard-header {
+    display: none !important;
+  }
+  
+  .dashboard-main {
+    padding: 0 !important;
+  }
+  
+  .chart-container,
+  .kpi-card,
+  .card {
+    break-inside: avoid;
+    margin-bottom: var(--spacing-4);
+  }
+  
+  .chart-actions,
+  .filter-panel,
+  .btn,
+  .modal,
+  .dropdown {
+    display: none !important;
+  }
+  
+  .dashboard-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: var(--spacing-4) !important;
+  }
+  
+  .kpi-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+  
+  .chart-grid,
+  .chart-grid-2,
+  .chart-grid-3 {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .table {
+    font-size: 0.75rem !important;
+  }
+  
+  .table th,
+  .table td {
+    padding: var(--spacing-1) var(--spacing-2) !important;
+  }
+}
+
+/* ============================================================================
+   FOCUS AND ACCESSIBILITY RESPONSIVE STYLES
+   ============================================================================ */
+
+@media (prefers-reduced-motion: no-preference) {
+  .focus-ring:focus {
+    transition: box-shadow var(--transition-fast);
+  }
+}
+
+/* Enhanced focus styles for keyboard navigation */
+@media (prefers-reduced-motion: no-preference) {
+  .btn:focus,
+  .form-input:focus,
+  .nav-item:focus {
+    transform: translateY(-1px);
+    transition: all var(--transition-fast);
+  }
+}
+
+/* ============================================================================
+   CONTAINER QUERIES (FUTURE-PROOF)
+   ============================================================================ */
+
+/* These will work when container queries have better browser support */
+/*
+@container dashboard (max-width: 600px) {
+  .chart-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@container dashboard (min-width: 800px) {
+  .chart-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .kpi-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+*/
+
+/* ============================================================================
+   RESPONSIVE UTILITIES
+   ============================================================================ */
+
+/* Display utilities for different screen sizes */
+.show-mobile { display: none !important; }
+.show-tablet { display: none !important; }
+.show-desktop { display: none !important; }
+.show-lg { display: none !important; }
+.show-xl { display: none !important; }
+
+@media (max-width: 639px) {
+  .show-mobile { display: block !important; }
+  .hide-mobile { display: none !important; }
+}
+
+@media (min-width: 640px) and (max-width: 767px) {
+  .show-tablet { display: block !important; }
+  .hide-tablet { display: none !important; }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .show-desktop { display: block !important; }
+  .hide-desktop { display: none !important; }
+}
+
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .show-lg { display: block !important; }
+  .hide-lg { display: none !important; }
+}
+
+@media (min-width: 1280px) {
+  .show-xl { display: block !important; }
+  .hide-xl { display: none !important; }
+}
+
+/* Responsive text alignment */
+@media (max-width: 639px) {
+  .text-center-mobile { text-align: center !important; }
+  .text-left-mobile { text-align: left !important; }
+  .text-right-mobile { text-align: right !important; }
+}
+
+@media (min-width: 640px) {
+  .text-center-tablet { text-align: center !important; }
+  .text-left-tablet { text-align: left !important; }
+  .text-right-tablet { text-align: right !important; }
+}
+
+@media (min-width: 768px) {
+  .text-center-desktop { text-align: center !important; }
+  .text-left-desktop { text-align: left !important; }
+  .text-right-desktop { text-align: right !important; }
+}
+
+/* Responsive spacing */
+@media (max-width: 639px) {
+  .p-mobile-2 { padding: var(--spacing-2) !important; }
+  .p-mobile-4 { padding: var(--spacing-4) !important; }
+  .m-mobile-2 { margin: var(--spacing-2) !important; }
+  .m-mobile-4 { margin: var(--spacing-4) !important; }
+}
+
+@media (min-width: 640px) {
+  .p-tablet-4 { padding: var(--spacing-4) !important; }
+  .p-tablet-6 { padding: var(--spacing-6) !important; }
+  .m-tablet-4 { margin: var(--spacing-4) !important; }
+  .m-tablet-6 { margin: var(--spacing-6) !important; }
+}
+
+@media (min-width: 768px) {
+  .p-desktop-6 { padding: var(--spacing-6) !important; }
+  .p-desktop-8 { padding: var(--spacing-8) !important; }
+  .m-desktop-6 { margin: var(--spacing-6) !important; }
+  .m-desktop-8 { margin: var(--spacing-8) !important; }
+}
+
+/* ============================================================================
+   RESPONSIVE PERFORMANCE OPTIMIZATIONS
+   ============================================================================ */
+
+/* Optimize animations for mobile */
+@media (max-width: 639px) {
+  .animate-spin,
+  .animate-pulse,
+  .animate-bounce {
+    animation-duration: 1s;
+  }
+  
+  .transition,
+  .transition-fast,
+  .transition-slow {
+    transition-duration: 150ms;
+  }
+}
+
+/* Optimize shadows for performance on mobile */
+@media (max-width: 639px) {
+  .shadow-lg,
+  .shadow-xl,
+  .shadow-2xl {
+    box-shadow: var(--shadow-md);
+  }
+}
+
+/* Reduce backdrop blur on mobile for performance */
+@media (max-width: 639px) {
+  .overview-metric {
+    backdrop-filter: none;
+    background: rgba(255, 255, 255, 0.2);
+  }
+} Mobile */
+  .hidden-mobile {
+    display: none !important;
+  }
+  
+  .block-mobile {
+    display: block !important;
+  }
+  
+  .flex-mobile {
+    display: flex !important;
+  }
+
+/* ============================================================================
+   TABLET STYLES (640px to 767px)
+   ============================================================================ */
+
+@media (min-width: 640px) and (max-width: 767px) {
+  .dashboard-main {
+    padding: var(--spacing-5);
+  }
+  
+  /* Grid adjustments for tablet */
+  .col-sm-1 { grid-column: span 1; }
+  .col-sm-2 { grid-column: span 2; }
+  .col-sm-3 { grid-column: span 3; }
+  .col-sm-4 { grid-column: span 4; }
+  .col-sm-5 { grid-column: span 5; }
+  .col-sm-6 { grid-column: span 6; }
+  .col-sm-7 { grid-column: span 7; }
+  .col-sm-8 { grid-column: span 8; }
+  .col-sm-9 { grid-column: span 9; }
+  .col-sm-10 { grid-column: span 10; }
+  .col-sm-11 { grid-column: span 11; }
+  .col-sm-12 { grid-column: span 12; }
+  }
+  
+  /* KPI Grid for tablet */
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  /* Chart Grid for tablet */
+  .chart-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .chart-grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .chart-grid-3 {
+    grid-template-columns: 1fr;
+  }
+  
+  /* Filter panel for tablet */
+  .filter-panel-content {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  /* Data management grid */
+  .data-management-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  /* Export options */
+  .export-options {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  /* Overview metrics */
+  .overview-metrics {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  /* Utility Classes for Mobile */

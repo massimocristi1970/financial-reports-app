@@ -1,38 +1,308 @@
+/* App.css - Main application styles */
+
+/* App container */
 .App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-background);
+  color: var(--color-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Main content area */
+.main-content {
+  flex: 1;
+  padding: var(--spacing-md);
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Route loading animation */
+.route-loading {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  min-height: 400px;
+  gap: var(--spacing-md);
 }
 
-.App-link {
-  color: #61dafb;
+.route-loading p {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  animation: fadeInOut 1.5s ease-in-out infinite;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+@keyframes fadeInOut {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+/* Route transition animations */
+.route-enter {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.route-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms ease, transform 300ms ease;
+}
+
+.route-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.route-exit-active {
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: opacity 300ms ease, transform 300ms ease;
+}
+
+/* Error boundary fallback */
+.app-error-fallback {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-lg);
+  background: var(--color-background);
+}
+
+.error-container {
+  max-width: 600px;
+  text-align: center;
+  padding: var(--spacing-xl);
+  background: var(--color-surface);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--color-border-error);
+}
+
+.error-container h1 {
+  color: var(--color-error);
+  margin-bottom: var(--spacing-md);
+  font-size: var(--font-size-xl);
+}
+
+.error-container p {
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-lg);
+  line-height: 1.6;
+}
+
+.error-details {
+  margin: var(--spacing-lg) 0;
+  text-align: left;
+}
+
+.error-details summary {
+  cursor: pointer;
+  padding: var(--spacing-sm);
+  background: var(--color-background);
+  border-radius: var(--border-radius-sm);
+  margin-bottom: var(--spacing-sm);
+  color: var(--color-text-secondary);
+}
+
+.error-details summary:hover {
+  background: var(--color-hover);
+}
+
+.error-details pre {
+  background: var(--color-background);
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-sm);
+  overflow: auto;
+  font-size: var(--font-size-sm);
+  color: var(--color-error);
+  border: 1px solid var(--color-border);
+}
+
+.error-actions {
+  display: flex;
+  gap: var(--spacing-md);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* 404 Not Found page */
+.not-found {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  text-align: center;
+  padding: var(--spacing-xl);
+}
+
+.not-found h1 {
+  font-size: var(--font-size-2xl);
+  color: var(--color-text);
+  margin-bottom: var(--spacing-md);
+}
+
+.not-found p {
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-lg);
+  font-size: var(--font-size-md);
+}
+
+/* Loading states */
+.app-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: var(--color-background);
+}
+
+.app-loading .loading-content {
+  text-align: center;
+}
+
+.app-loading .loading-content h2 {
+  margin-top: var(--spacing-md);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Responsive design for mobile */
+@media (max-width: 768px) {
+  .main-content {
+    padding: var(--spacing-sm);
   }
-  to {
-    transform: rotate(360deg);
+  
+  .error-container {
+    padding: var(--spacing-lg);
+    margin: var(--spacing-md);
+  }
+  
+  .error-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .not-found {
+    padding: var(--spacing-lg);
+  }
+  
+  .not-found h1 {
+    font-size: var(--font-size-xl);
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .App {
+    border: 2px solid var(--color-border);
+  }
+  
+  .error-container {
+    border: 2px solid var(--color-border-error);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .route-enter-active,
+  .route-exit-active {
+    transition: none;
+  }
+  
+  .route-loading p {
+    animation: none;
+    opacity: 1;
+  }
+  
+  .App {
+    transition: none;
+  }
+}
+
+/* Print styles */
+@media print {
+  .App {
+    background: white !important;
+    color: black !important;
+  }
+  
+  .main-content {
+    padding: 0;
+  }
+  
+  .route-loading,
+  .app-error-fallback,
+  .not-found {
+    display: none;
+  }
+}
+
+/* Dark mode specific adjustments */
+[data-theme="dark"] .app-error-fallback {
+  background: var(--color-background-dark);
+}
+
+[data-theme="dark"] .error-container {
+  background: var(--color-surface-dark);
+  border-color: var(--color-border-error-dark);
+}
+
+[data-theme="dark"] .error-details pre {
+  background: var(--color-background-dark);
+  border-color: var(--color-border-dark);
+}
+
+/* Focus management for accessibility */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: var(--color-primary);
+  color: white;
+  padding: 8px;
+  border-radius: var(--border-radius-sm);
+  text-decoration: none;
+  z-index: 1000;
+  transition: top 0.3s ease;
+}
+
+.skip-link:focus {
+  top: 6px;
+}
+
+/* Route-specific loading optimizations */
+.dashboard-loading {
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-loading {
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Performance optimizations */
+.main-content {
+  contain: layout;
+  will-change: transform;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
   }
 }
