@@ -598,4 +598,13 @@ export const ThemeProvider = ({ children }) => {
     isAnimationsEnabled: () => state.preferences.animations && !state.preferences.reducedMotion,
     
 	// Responsive utilities
-	isBreakpoint: (breakpoint) => getBreakpoint()
+	// Responsive utilities
+isBreakpoint: (breakpoint) => getBreakpoint()
+  };
+
+  return (
+    <ThemeContext.Provider value={contextValue}>
+      {children}
+    </ThemeContext.Provider>
+  );
+};

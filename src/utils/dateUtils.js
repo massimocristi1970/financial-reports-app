@@ -338,6 +338,26 @@ export const getPeriodBounds = (date, period = 'month') => {
   return { start, end };
 };
 
+// Additional exports for compatibility
+export const formatDate = (date, format = 'DD/MM/YYYY') => {
+  if (!date) return '';
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  if (isNaN(dateObj.getTime())) return '';
+  
+  const day = dateObj.getDate().toString().padStart(2, '0');
+  const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+  const year = dateObj.getFullYear();
+  
+  return format === 'YYYY-MM-DD' ? `${year}-${month}-${day}` : `${day}/${month}/${year}`;
+};
+
+export const isWithinDateRange = (date, start, end) => {
+  const d = new Date(date);
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+  return d >= startDate && d <= endDate;
+};
+
 // Export all utilities
 export default {
   getDateRangeFromPreset,
@@ -354,4 +374,4 @@ export default {
   generateDateLabels,
   getDateDifference,
   getPeriodBounds
-}; 
+};

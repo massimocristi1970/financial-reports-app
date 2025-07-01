@@ -363,4 +363,13 @@ export const exportAllData = () => dbHelper.exportAllData();
 export const importData = (data) => dbHelper.importData(data);
 export const closeDB = () => dbHelper.close();
 
-export default dbHelper; 
+export default dbHelper;
+
+// Additional exports for compatibility
+export const getDataMetadata = () => Promise.resolve({});
+export const getAllDataFromIndexedDB = exportAllData;
+export const deleteDataFromIndexedDB = deleteData;
+export const clearAllData = clearStore;
+export const saveDataToIndexedDB = saveData;
+export const loadData = getData;
+export const clearData = clearStore;

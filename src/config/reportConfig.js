@@ -128,6 +128,8 @@ export const REPORT_CONFIG = {
   }
 };
 
+export const REPORT_CONFIGS = REPORT_CONFIG;
+
 // Navigation configuration
 export const NAVIGATION_CONFIG = [
   {

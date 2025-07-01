@@ -219,6 +219,37 @@ export const COMPLAINT_SEVERITY = {
   CRITICAL: 'Critical'
 };
 
+// Report types based on existing DB_CONFIG.STORES
+export const REPORT_TYPES = {
+  LENDING_VOLUME: 'lending-volume',
+  ARREARS: 'arrears', 
+  LIQUIDATIONS: 'liquidations',
+  CALL_CENTER: 'call-center',
+  COMPLAINTS: 'complaints'
+};
+
+// Filter presets using existing DATE_PRESETS
+export const FILTER_PRESETS = DATE_PRESETS;
+
+// Product types array
+export const PRODUCT_TYPES = [
+  'Personal Loan',
+  'Mortgage', 
+  'Credit Card',
+  'Business Loan',
+  'Auto Loan'
+];
+
+// Regions array
+export const REGIONS = [
+  'North',
+  'South',
+  'East', 
+  'West',
+  'Central'
+];
+
+
 export default {
   STORAGE_KEYS,
   DB_CONFIG,

@@ -299,3 +299,6 @@ export const KPI_FORMATS = {
 };
 
 export default CHART_CONFIGS; 
+
+// Add this export (aliases your existing CHART_CONFIGS)
+export const CHART_CONFIG = CHART_CONFIGS;
