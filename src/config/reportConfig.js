@@ -1,106 +1,160 @@
-// src/config/reportConfig.js
+// src/config/reportConfig.js - COMPLETE WORKING VERSION
 
-export const REPORT_TYPES = {
-  LENDING_VOLUME: 'lending-volume',
-  ARREARS: 'arrears', 
-  LIQUIDATIONS: 'liquidations',
-  CALL_CENTER: 'call-center',
-  COMPLAINTS: 'complaints'
-};
+import { REPORT_TYPES } from '../utils/constants';
 
 export const REPORT_CONFIG = {
   [REPORT_TYPES.LENDING_VOLUME]: {
     title: 'Lending Volume',
-    description: 'Track loan origination volumes and trends',
+    description: 'Track loan origination volumes and customer activity',
     icon: '💰',
     color: '#2563eb',
     dataFile: 'lending-volume.json',
     fields: {
-      date: { label: 'Date', type: 'date', required: true },
-      amount: { label: 'Loan Amount', type: 'currency', required: true },
-      product_type: { label: 'Product Type', type: 'category', required: true },
-      region: { label: 'Region', type: 'category', required: false },
-      channel: { label: 'Channel', type: 'category', required: false },
-      loan_count: { label: 'Number of Loans', type: 'number', required: false }
+      customer_id: { label: 'Customer ID', type: 'string', required: true },
+      funded_app_count: { label: 'Funded App Count', type: 'number', required: true },
+      tier_name: { label: 'Lead Source', type: 'category', required: false },
+      stage: { label: 'Current Stage', type: 'category', required: true },
+      stage_date: { label: 'Stage Date', type: 'date', required: true },
+      payment_status: { label: 'Payment Status', type: 'category', required: false },
+      funded_date: { label: 'Funded Date', type: 'date', required: false },
+      last_payment_date: { label: 'Last Payment Date', type: 'date', required: false },
+      issued_amount: { label: 'Issued Amount', type: 'currency', required: true },
+      total_due: { label: 'Total Due', type: 'currency', required: false },
+      payment: { label: 'Payment Amount', type: 'currency', required: false }
     },
     kpis: [
-      { key: 'total_volume', label: 'Total Volume', format: 'currency' },
+      { key: 'total_issued', label: 'Total Issued Amount', format: 'currency' },
       { key: 'avg_loan_size', label: 'Average Loan Size', format: 'currency' },
-      { key: 'loan_count', label: 'Total Loans', format: 'number' },
-      { key: 'growth_rate', label: 'Growth Rate', format: 'percentage' }
+      { key: 'funded_count', label: 'Funded Applications', format: 'number' },
+      { key: 'conversion_rate', label: 'Funding Conversion Rate', format: 'percentage' }
     ],
-    charts: ['trend', 'product_breakdown', 'regional_distribution']
+    charts: ['funding_trend', 'stage_breakdown', 'lead_source_performance', 'payment_status_distribution']
   },
 
   [REPORT_TYPES.ARREARS]: {
     title: 'Arrears Analysis',
-    description: 'Monitor overdue accounts and payment behavior',
+    description: 'Monitor overdue accounts and payment behavior (excluding Funded and Repaid)',
     icon: '⚠️',
     color: '#dc2626',
     dataFile: 'arrears.json',
     fields: {
-      date: { label: 'Date', type: 'date', required: true },
-      account_id: { label: 'Account ID', type: 'string', required: true },
-      arrears_amount: { label: 'Arrears Amount', type: 'currency', required: true },
-      days_overdue: { label: 'Days Overdue', type: 'number', required: true },
-      product_type: { label: 'Product Type', type: 'category', required: false },
-      customer_segment: { label: 'Customer Segment', type: 'category', required: false },
-      balance: { label: 'Outstanding Balance', type: 'currency', required: false }
+      customer_id: { label: 'Customer ID', type: 'string', required: true },
+      funded_app_count: { label: 'Funded App Count', type: 'number', required: true },
+      tier_name: { label: 'Lead Source', type: 'category', required: false },
+      stage: { label: 'Current Stage', type: 'category', required: true },
+      stage_date: { label: 'Stage Date', type: 'date', required: true },
+      payment_status: { label: 'Payment Status', type: 'category', required: true },
+      funded_date: { label: 'Funded Date', type: 'date', required: false },
+      last_payment_date: { label: 'Last Payment Date', type: 'date', required: false },
+      issued_amount: { label: 'Issued Amount', type: 'currency', required: true },
+      total_due: { label: 'Total Due', type: 'currency', required: true },
+      payment: { label: 'Payment Amount', type: 'currency', required: false }
     },
     kpis: [
-      { key: 'total_arrears', label: 'Total Arrears', format: 'currency' },
-      { key: 'arrears_rate', label: 'Arrears Rate', format: 'percentage' },
-      { key: 'avg_days_overdue', label: 'Avg Days Overdue', format: 'number' },
-      { key: 'account_count', label: 'Accounts in Arrears', format: 'number' }
+      { key: 'total_arrears', label: 'Total Arrears Amount', format: 'currency' },
+      { key: 'arrears_accounts', label: 'Accounts in Arrears', format: 'number' },
+      { key: 'avg_days_since_payment', label: 'Avg Days Since Last Payment', format: 'number' },
+      { key: 'arrears_rate', label: 'Arrears Rate', format: 'percentage' }
     ],
-    charts: ['arrears_trend', 'aging_analysis', 'product_performance']
+    charts: ['arrears_trend', 'payment_status_breakdown', 'stage_analysis', 'aging_analysis']
   },
 
   [REPORT_TYPES.LIQUIDATIONS]: {
-    title: 'Liquidations',
-    description: 'Track liquidation activities and recovery rates',
+    title: 'Liquidations Analysis',
+    description: 'Track liquidation performance and recovery rates',
     icon: '🔄',
     color: '#7c3aed',
     dataFile: 'liquidations.json',
     fields: {
-      date: { label: 'Date', type: 'date', required: true },
-      account_id: { label: 'Account ID', type: 'string', required: true },
-      liquidation_amount: { label: 'Liquidation Amount', type: 'currency', required: true },
-      recovery_rate: { label: 'Recovery Rate', type: 'percentage', required: true },
-      liquidation_type: { label: 'Liquidation Type', type: 'category', required: false },
-      time_to_liquidation: { label: 'Time to Liquidation (days)', type: 'number', required: false }
+      funded_year: { label: 'Funded Year', type: 'number', required: true },
+      funded_month: { label: 'Funded Month', type: 'number', required: true },
+      funded: { label: 'Total Funded Amount', type: 'currency', required: true },
+      collected: { label: 'Collected (Not DMP/IVA)', type: 'currency', required: true },
+      actual_liquidation_rate: { label: 'Actual Liquidation Rate', type: 'percentage', required: true },
+      future_scheduled: { label: 'Future Scheduled Payments', type: 'currency', required: false },
+      dmp_iva_collected: { label: 'DMP/IVA Collected', type: 'currency', required: false },
+      all_together: { label: 'Total Combined Collected', type: 'currency', required: true },
+      forecast_liquidation_rate: { label: 'Forecast Liquidation Rate', type: 'percentage', required: false },
+      total_due_not_scheduled: { label: 'Outstanding Not Scheduled', type: 'currency', required: false }
     },
     kpis: [
-      { key: 'total_liquidations', label: 'Total Liquidations', format: 'currency' },
-      { key: 'avg_recovery_rate', label: 'Average Recovery Rate', format: 'percentage' },
-      { key: 'liquidation_count', label: 'Number of Liquidations', format: 'number' },
-      { key: 'avg_time_to_liquidation', label: 'Avg Time to Liquidation', format: 'number' }
+      { key: 'total_funded', label: 'Total Funded', format: 'currency' },
+      { key: 'total_collected', label: 'Total Collected', format: 'currency' },
+      { key: 'avg_liquidation_rate', label: 'Average Liquidation Rate', format: 'percentage' },
+      { key: 'recovery_efficiency', label: 'Recovery Efficiency', format: 'percentage' }
     ],
-    charts: ['liquidation_trend', 'recovery_analysis', 'type_breakdown']
+    charts: ['liquidation_trend', 'recovery_performance', 'vintage_analysis', 'collection_breakdown']
   },
 
   [REPORT_TYPES.CALL_CENTER]: {
     title: 'Call Center Performance',
-    description: 'Monitor call center metrics and customer service levels',
+    description: 'Monitor call center metrics across multiple data sources',
     icon: '📞',
     color: '#059669',
     dataFile: 'call-center.json',
+    // Multiple file structure for call center
+    fileStructures: {
+      report1: {
+        name: 'Call Details',
+        fields: {
+          call_id: { label: 'Call ID', type: 'string', required: true },
+          date_time: { label: 'Date/Time', type: 'datetime', required: true },
+          agent_name: { label: 'Agent Name', type: 'string', required: true },
+          answered_date_time: { label: 'Answered Date/Time', type: 'datetime', required: false },
+          from_number: { label: 'From Number', type: 'string', required: false },
+          disposition: { label: 'Disposition', type: 'category', required: true },
+          talk_time: { label: 'Talk Time (seconds)', type: 'number', required: false }
+        }
+      },
+      report2: {
+        name: 'Agent Performance',
+        fields: {
+          phone_numbers: { label: 'Phone Numbers', type: 'string', required: true },
+          total_calls: { label: 'Total Calls', type: 'number', required: true },
+          total_call_duration: { label: 'Total Call Duration', type: 'number', required: true },
+          inbound_calls: { label: 'Inbound Calls', type: 'number', required: true },
+          inbound_call_duration: { label: 'Inbound Call Duration', type: 'number', required: true },
+          outbound_calls: { label: 'Outbound Calls', type: 'number', required: true },
+          outbound_call_duration: { label: 'Outbound Call Duration', type: 'number', required: true },
+          missed_calls: { label: 'Missed Calls', type: 'number', required: true }
+        }
+      },
+      report3: {
+        name: 'Call Statistics',
+        fields: {
+          call_id: { label: 'Call ID', type: 'string', required: true },
+          date_time_earliest: { label: 'Date/Time (Earliest)', type: 'datetime', required: true },
+          duration: { label: 'Duration', type: 'number', required: true },
+          initial_direction: { label: 'Initial Direction', type: 'category', required: true },
+          inbound: { label: 'Inbound Count', type: 'number', required: false },
+          outbound: { label: 'Outbound Count', type: 'number', required: false }
+        }
+      },
+      report4: {
+        name: 'First Call Resolution',
+        fields: {
+          date: { label: 'Date', type: 'date', required: true },
+          fcr: { label: 'First Call Resolution Count', type: 'number', required: true }
+        }
+      }
+    },
+    // Default fields for validation (use report1 as default)
     fields: {
-      date: { label: 'Date', type: 'date', required: true },
-      calls_received: { label: 'Calls Received', type: 'number', required: true },
-      calls_answered: { label: 'Calls Answered', type: 'number', required: true },
-      avg_wait_time: { label: 'Average Wait Time (seconds)', type: 'number', required: true },
-      avg_handle_time: { label: 'Average Handle Time (seconds)', type: 'number', required: false },
-      first_call_resolution: { label: 'First Call Resolution Rate', type: 'percentage', required: false },
-      customer_satisfaction: { label: 'Customer Satisfaction Score', type: 'number', required: false }
+      call_id: { label: 'Call ID', type: 'string', required: true },
+      date_time: { label: 'Date/Time', type: 'datetime', required: true },
+      agent_name: { label: 'Agent Name', type: 'string', required: true },
+      answered_date_time: { label: 'Answered Date/Time', type: 'datetime', required: false },
+      from_number: { label: 'From Number', type: 'string', required: false },
+      disposition: { label: 'Disposition', type: 'category', required: true },
+      talk_time: { label: 'Talk Time (seconds)', type: 'number', required: false }
     },
     kpis: [
-      { key: 'service_level', label: 'Service Level', format: 'percentage' },
-      { key: 'avg_wait_time', label: 'Average Wait Time', format: 'time' },
-      { key: 'call_volume', label: 'Daily Call Volume', format: 'number' },
-      { key: 'first_call_resolution', label: 'First Call Resolution', format: 'percentage' }
+      { key: 'total_calls', label: 'Total Calls', format: 'number' },
+      { key: 'answer_rate', label: 'Answer Rate', format: 'percentage' },
+      { key: 'avg_talk_time', label: 'Average Talk Time', format: 'time' },
+      { key: 'fcr_rate', label: 'First Call Resolution Rate', format: 'percentage' }
     ],
-    charts: ['call_volume_trend', 'service_level_trend', 'performance_metrics']
+    charts: ['call_volume_trend', 'agent_performance', 'disposition_breakdown', 'fcr_trend']
   },
 
   [REPORT_TYPES.COMPLAINTS]: {
@@ -110,21 +164,21 @@ export const REPORT_CONFIG = {
     color: '#ea580c',
     dataFile: 'complaints.json',
     fields: {
-      date: { label: 'Date', type: 'date', required: true },
-      complaint_id: { label: 'Complaint ID', type: 'string', required: true },
-      complaint_type: { label: 'Complaint Type', type: 'category', required: true },
-      status: { label: 'Status', type: 'category', required: true },
-      resolution_time: { label: 'Resolution Time (days)', type: 'number', required: false },
-      severity: { label: 'Severity', type: 'category', required: false },
-      channel: { label: 'Channel', type: 'category', required: false }
+      customer_id: { label: 'Customer ID', type: 'string', required: true },
+      count: { label: 'Complaint Count', type: 'number', required: true },
+      received_date: { label: 'Received Date', type: 'date', required: true },
+      resolved_date: { label: 'Resolved Date', type: 'date', required: false },
+      days_to_resolve: { label: 'Days to Resolve', type: 'number', required: false },
+      category: { label: 'Category', type: 'category', required: true },
+      decision: { label: 'Resolution Decision', type: 'category', required: false }
     },
     kpis: [
       { key: 'total_complaints', label: 'Total Complaints', format: 'number' },
-      { key: 'avg_resolution_time', label: 'Avg Resolution Time', format: 'number' },
+      { key: 'avg_resolution_time', label: 'Avg Resolution Time (days)', format: 'number' },
       { key: 'resolution_rate', label: 'Resolution Rate', format: 'percentage' },
-      { key: 'complaints_per_1000', label: 'Complaints per 1000 customers', format: 'number' }
+      { key: 'repeat_customers', label: 'Repeat Complaint Customers', format: 'number' }
     ],
-    charts: ['complaint_trend', 'type_breakdown', 'resolution_performance']
+    charts: ['complaint_trend', 'category_breakdown', 'resolution_performance', 'repeat_analysis']
   }
 };
 
@@ -182,4 +236,4 @@ export const NAVIGATION_CONFIG = [
   }
 ];
 
-export default REPORT_CONFIG; 
+export default REPORT_CONFIG;

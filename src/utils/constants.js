@@ -1,4 +1,4 @@
-// src/utils/constants.js
+// src/utils/constants.js - FIXED VERSION
 
 // Data storage keys
 export const STORAGE_KEYS = {
@@ -28,7 +28,8 @@ export const DATE_FORMATS = {
   DISPLAY: 'DD/MM/YYYY',
   API: 'YYYY-MM-DD',
   CHART: 'MMM YYYY',
-  TIMESTAMP: 'YYYY-MM-DD HH:mm:ss'
+  TIMESTAMP: 'YYYY-MM-DD HH:mm:ss',
+  DATETIME: 'DD/MM/YYYY HH:mm'
 };
 
 // File upload constraints
@@ -57,6 +58,165 @@ export const FORMATS = {
   }
 };
 
+// Updated report types to match your structure
+export const REPORT_TYPES = {
+  LENDING_VOLUME: 'lending-volume',
+  ARREARS: 'arrears', 
+  LIQUIDATIONS: 'liquidations',
+  CALL_CENTER: 'call-center',
+  COMPLAINTS: 'complaints'
+};
+
+// CSV column mappings (your actual column variations)
+export const COLUMN_MAPPINGS = {
+  // Lending Volume & Arrears fields
+  customer_id: ['CustomerID', 'Customer ID', 'customer_id', 'customerId'],
+  funded_app_count: ['FundedAppCount', 'Funded App Count', 'funded_app_count'],
+  tier_name: ['TierName', 'Tier Name', 'tier_name', 'Lead Source'],
+  stage: ['Stage', 'stage', 'Current Stage'],
+  stage_date: ['StageDate', 'Stage Date', 'stage_date'],
+  payment_status: ['PaymentStatus', 'Payment Status', 'payment_status'],
+  funded_date: ['FundedDate', 'Funded Date', 'funded_date'],
+  last_payment_date: ['LastPaymentDate', 'Last Payment Date', 'last_payment_date'],
+  issued_amount: ['IssuedAmount', 'Issued Amount', 'issued_amount'],
+  total_due: ['TotalDue', 'Total Due', 'total_due'],
+  payment: ['Payment', 'payment', 'Payment Amount'],
+
+  // Liquidations fields
+  funded_year: ['FundedYear', 'Funded Year', 'funded_year'],
+  funded_month: ['FundedMonth', 'Funded Month', 'funded_month'],
+  funded: ['Funded', 'funded', 'Total Funded'],
+  collected: ['Collected', 'collected', 'Total Collected'],
+  actual_liquidation_rate: ['Actual Liquidation rate %', 'Actual Liquidation Rate', 'actual_liquidation_rate'],
+  future_scheduled: ['FutureScheduled', 'Future Scheduled', 'future_scheduled'],
+  dmp_iva_collected: ['DMP/IVA', 'DMP IVA', 'dmp_iva_collected'],
+  all_together: ['AllTogether', 'All Together', 'all_together'],
+  forecast_liquidation_rate: ['Forecast Liquidation rate %', 'Forecast Liquidation Rate', 'forecast_liquidation_rate'],
+  total_due_not_scheduled: ['TotalDueNotScheduled', 'Total Due Not Scheduled', 'total_due_not_scheduled'],
+
+  // Call Center Report 1 fields
+  call_id: ['Call ID', 'CallID', 'call_id'],
+  date_time: ['Date/Time', 'DateTime', 'date_time'],
+  agent_name: ['Agent Name', 'AgentName', 'agent_name'],
+  answered_date_time: ['Answered Date/Time', 'AnsweredDateTime', 'answered_date_time'],
+  from_number: ['From', 'from', 'From Number'],
+  disposition: ['Disposition', 'disposition'],
+  talk_time: ['Talk Time', 'TalkTime', 'talk_time'],
+
+  // Call Center Report 2 fields
+  phone_numbers: ['Phone Numbers', 'PhoneNumbers', 'phone_numbers'],
+  total_calls: ['Total Calls', 'TotalCalls', 'total_calls'],
+  total_call_duration: ['Total Call Duration', 'TotalCallDuration', 'total_call_duration'],
+  inbound_calls: ['Inbound Calls', 'InboundCalls', 'inbound_calls'],
+  inbound_call_duration: ['Inbound Call Duration', 'InboundCallDuration', 'inbound_call_duration'],
+  outbound_calls: ['Outbound Calls', 'OutboundCalls', 'outbound_calls'],
+  outbound_call_duration: ['Outbound Call Duration', 'OutboundCallDuration', 'outbound_call_duration'],
+  missed_calls: ['Missed Calls', 'MissedCalls', 'missed_calls'],
+
+  // Call Center Report 3 fields
+  date_time_earliest: ['Date/Time (earliest)', 'DateTime (earliest)', 'date_time_earliest'],
+  duration: ['Duration', 'duration'],
+  initial_direction: ['Initial Direction', 'InitialDirection', 'initial_direction'],
+  inbound: ['Inbound', 'inbound'],
+  outbound: ['Outbound', 'outbound'],
+
+  // Call Center Report 4 fields
+  date: ['Date', 'date'],
+  fcr: ['FCR', 'fcr', 'First Call Resolution'],
+
+  // Complaints fields
+  count: ['Count', 'count', 'Complaint Count'],
+  received_date: ['ReceivedDate', 'Received Date', 'received_date'],
+  resolved_date: ['ResolvedDate', 'Resolved Date', 'resolved_date'],
+  days_to_resolve: ['DaysToResolve', 'Days To Resolve', 'days_to_resolve'],
+  category: ['Category', 'category', 'Complaint Category'],
+  decision: ['Decision', 'decision', 'Resolution Decision']
+};
+
+// Data validation rules - FIXED THE SYNTAX ERROR
+export const VALIDATION_RULES = {
+  required: (value) => value !== null && value !== undefined && value !== '',
+  isNumber: (value) => !isNaN(parseFloat(value)) && isFinite(value),
+  isDate: (value) => !isNaN(Date.parse(value)),
+  isPositive: (value) => parseFloat(value) >= 0,
+  isPercentage: (value) => parseFloat(value) >= 0 && parseFloat(value) <= 100,
+  maxLength: (value, length) => value.toString().length <= length,
+  isCustomerId: (value) => /^[A-Za-z0-9]+$/.test(value), // Alphanumeric customer IDs
+  isCallId: (value) => /^[A-Za-z0-9-_]+$/.test(value), // Call IDs can have hyphens/underscores
+  isPhoneNumber: (value) => /^[\d\s\-\+\(\)]+$/.test(value) // Basic phone number validation
+};
+
+// Stage categories for lending/arrears
+export const LOAN_STAGES = [
+  'Application',
+  'Underwriting',
+  'Approved',
+  'Funded',
+  'Active',
+  'Arrears',
+  'Default',
+  'Repaid',
+  'Written Off'
+];
+
+// Payment status categories
+export const PAYMENT_STATUSES = [
+  'Current',
+  'Late',
+  'Missed',
+  'Default',
+  'Settled',
+  'Written Off'
+];
+
+// Lead sources/Tier names
+export const LEAD_SOURCES = [
+  'Direct',
+  'Broker',
+  'Online',
+  'Referral',
+  'Marketing Campaign',
+  'Social Media',
+  'Other'
+];
+
+// Call dispositions
+export const CALL_DISPOSITIONS = [
+  'Answered',
+  'Abandoned',
+  'Forwarded',
+  'Busy',
+  'No Answer',
+  'Voicemail'
+];
+
+// Call directions
+export const CALL_DIRECTIONS = [
+  'Inbound',
+  'Outbound'
+];
+
+// Complaint categories
+export const COMPLAINT_CATEGORIES = [
+  'Payment Issues',
+  'Customer Service',
+  'Product Complaint',
+  'Process Complaint',
+  'Billing Dispute',
+  'Data Protection',
+  'Other'
+];
+
+// Complaint decisions
+export const COMPLAINT_DECISIONS = [
+  'Upheld',
+  'Partially Upheld',
+  'Not Upheld',
+  'Withdrawn',
+  'Referred',
+  'Pending'
+];
+
 // Default filter values
 export const DEFAULT_FILTERS = {
   dateRange: {
@@ -64,9 +224,10 @@ export const DEFAULT_FILTERS = {
     end: null,
     preset: 'last_30_days'
   },
-  productType: 'all',
-  region: 'all',
-  status: 'all'
+  stage: 'all',
+  paymentStatus: 'all',
+  leadSource: 'all',
+  category: 'all'
 };
 
 // Date range presets
@@ -101,26 +262,6 @@ export const DATE_PRESETS = {
   }
 };
 
-// CSV column mappings (common variations)
-export const COLUMN_MAPPINGS = {
-  date: ['date', 'Date', 'DATE', 'transaction_date', 'reporting_date'],
-  amount: ['amount', 'Amount', 'AMOUNT', 'loan_amount', 'value', 'Value'],
-  product_type: ['product_type', 'Product Type', 'PRODUCT_TYPE', 'product', 'Product'],
-  account_id: ['account_id', 'Account ID', 'ACCOUNT_ID', 'account', 'Account'],
-  region: ['region', 'Region', 'REGION', 'area', 'Area'],
-  status: ['status', 'Status', 'STATUS', 'state', 'State']
-};
-
-// Data validation rules
-export const VALIDATION_RULES = {
-  required: (value) => value !== null && value !== undefined && value !== '',
-  isNumber: (value) => !isNaN(parseFloat(value)) && isFinite(value),
-  isDate: (value) => !isNaN(Date.parse(value)),
-  isPositive: (value) => parseFloat(value) >= 0,
-  isPercentage: (value) => parseFloat(value) >= 0 && parseFloat(value) <= 100,
-  maxLength: (value, length) => value.toString().length <= length
-};
-
 // Error messages
 export const ERROR_MESSAGES = {
   FILE_TOO_LARGE: 'File size exceeds maximum limit of 50MB',
@@ -143,95 +284,10 @@ export const SUCCESS_MESSAGES = {
   SETTINGS_SAVED: 'Settings saved successfully'
 };
 
-// Chart defaults
-export const CHART_DEFAULTS = {
-  HEIGHT: 400,
-  ANIMATION_DURATION: 1000,
-  POINT_RADIUS: 4,
-  LINE_WIDTH: 2,
-  GRID_COLOR: 'rgba(0, 0, 0, 0.1)',
-  FONT_SIZE: 12
-};
+// Missing exports that useFilters.js needs
+export const FILTER_PRESETS = DATE_PRESETS; // Alias for compatibility
 
-// Table defaults
-export const TABLE_DEFAULTS = {
-  PAGE_SIZE: 25,
-  PAGE_SIZE_OPTIONS: [10, 25, 50, 100],
-  SORT_DIRECTION: 'desc',
-  SORT_FIELD: 'date'
-};
-
-// API endpoints (for future server integration)
-export const API_ENDPOINTS = {
-  BASE_URL: process.env.REACT_APP_API_URL || '',
-  DATA: '/api/data',
-  UPLOAD: '/api/upload',
-  EXPORT: '/api/export',
-  HEALTH: '/api/health'
-};
-
-// Loading states
-export const LOADING_STATES = {
-  IDLE: 'idle',
-  LOADING: 'loading',
-  SUCCESS: 'success',
-  ERROR: 'error'
-};
-
-// Export formats
-export const EXPORT_FORMATS = {
-  CSV: 'csv',
-  EXCEL: 'xlsx',
-  PDF: 'pdf',
-  JSON: 'json'
-};
-
-// Notification types
-export const NOTIFICATION_TYPES = {
-  SUCCESS: 'success',
-  ERROR: 'error',
-  WARNING: 'warning',
-  INFO: 'info'
-};
-
-// Arrears aging buckets
-export const ARREARS_BUCKETS = {
-  CURRENT: { min: 0, max: 0, label: 'Current' },
-  BUCKET_1_30: { min: 1, max: 30, label: '1-30 days' },
-  BUCKET_31_60: { min: 31, max: 60, label: '31-60 days' },
-  BUCKET_61_90: { min: 61, max: 90, label: '61-90 days' },
-  BUCKET_90_PLUS: { min: 91, max: Infinity, label: '90+ days' }
-};
-
-// Call center service level thresholds
-export const SERVICE_LEVEL_THRESHOLDS = {
-  EXCELLENT: 95,
-  GOOD: 85,
-  ACCEPTABLE: 75,
-  POOR: 60
-};
-
-// Complaint severity levels
-export const COMPLAINT_SEVERITY = {
-  LOW: 'Low',
-  MEDIUM: 'Medium', 
-  HIGH: 'High',
-  CRITICAL: 'Critical'
-};
-
-// Report types based on existing DB_CONFIG.STORES
-export const REPORT_TYPES = {
-  LENDING_VOLUME: 'lending-volume',
-  ARREARS: 'arrears', 
-  LIQUIDATIONS: 'liquidations',
-  CALL_CENTER: 'call-center',
-  COMPLAINTS: 'complaints'
-};
-
-// Filter presets using existing DATE_PRESETS
-export const FILTER_PRESETS = DATE_PRESETS;
-
-// Product types array
+// Product types (keeping for backward compatibility)
 export const PRODUCT_TYPES = [
   'Personal Loan',
   'Mortgage', 
@@ -240,7 +296,7 @@ export const PRODUCT_TYPES = [
   'Auto Loan'
 ];
 
-// Regions array
+// Regions (keeping for backward compatibility)
 export const REGIONS = [
   'North',
   'South',
@@ -249,8 +305,18 @@ export const REGIONS = [
   'Central'
 ];
 
-
+// Export default object with all constants
 export default {
+  COLUMN_MAPPINGS,
+  REPORT_TYPES,
+  VALIDATION_RULES,
+  LOAN_STAGES,
+  PAYMENT_STATUSES,
+  LEAD_SOURCES,
+  CALL_DISPOSITIONS,
+  CALL_DIRECTIONS,
+  COMPLAINT_CATEGORIES,
+  COMPLAINT_DECISIONS,
   STORAGE_KEYS,
   DB_CONFIG,
   DATE_FORMATS,
@@ -258,17 +324,9 @@ export default {
   FORMATS,
   DEFAULT_FILTERS,
   DATE_PRESETS,
-  COLUMN_MAPPINGS,
-  VALIDATION_RULES,
   ERROR_MESSAGES,
   SUCCESS_MESSAGES,
-  CHART_DEFAULTS,
-  TABLE_DEFAULTS,
-  API_ENDPOINTS,
-  LOADING_STATES,
-  EXPORT_FORMATS,
-  NOTIFICATION_TYPES,
-  ARREARS_BUCKETS,
-  SERVICE_LEVEL_THRESHOLDS,
-  COMPLAINT_SEVERITY
-}; 
+  FILTER_PRESETS,
+  PRODUCT_TYPES,
+  REGIONS
+};

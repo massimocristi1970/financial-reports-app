@@ -1,6 +1,15 @@
-// src/services/validationService.js
-import { REPORT_TYPES, VALIDATION_RULES } from '../utils/constants';
-import { formatters } from '../utils/formatters';
+// src/services/validationService.js - CORRECT VERSION for your actual data structure
+import { 
+  REPORT_TYPES, 
+  VALIDATION_RULES, 
+  LOAN_STAGES, 
+  PAYMENT_STATUSES,
+  LEAD_SOURCES,
+  CALL_DISPOSITIONS,
+  CALL_DIRECTIONS,
+  COMPLAINT_CATEGORIES,
+  COMPLAINT_DECISIONS
+} from '../utils/constants';
 
 class ValidationService {
   constructor() {
@@ -8,227 +17,288 @@ class ValidationService {
     this.customValidators = new Map();
   }
 
-  // Initialize validation rules for each report type
+  // Initialize validation rules for YOUR actual data structure
   initializeValidationRules() {
     return {
       [REPORT_TYPES.LENDING_VOLUME]: {
-        required: ['date', 'product_type', 'region', 'amount', 'count'],
+        required: ['customer_id', 'stage', 'stage_date', 'issued_amount'],
         types: {
-          date: 'date',
-          product_type: 'string',
-          region: 'string',
-          amount: 'number',
-          count: 'integer'
+          customer_id: 'string',
+          funded_app_count: 'integer',
+          tier_name: 'string',
+          stage: 'string',
+          stage_date: 'date',
+          payment_status: 'string',
+          funded_date: 'date',
+          last_payment_date: 'date',
+          issued_amount: 'number',
+          total_due: 'number',
+          payment: 'number'
         },
         constraints: {
-          amount: { min: 0, max: 10000000 },
-          count: { min: 0, max: 100000 },
-          product_type: { enum: ['Personal Loan', 'Mortgage', 'Credit Card', 'Business Loan', 'Auto Loan'] },
-          region: { enum: ['North', 'South', 'East', 'West', 'Central'] }
+          funded_app_count: { min: 0, max: 1000 },
+          issued_amount: { min: 0, max: 10000000 },
+          total_due: { min: 0, max: 10000000 },
+          payment: { min: 0, max: 10000000 },
+          stage: { enum: LOAN_STAGES },
+          payment_status: { enum: PAYMENT_STATUSES },
+          tier_name: { enum: LEAD_SOURCES }
         }
       },
+
       [REPORT_TYPES.ARREARS]: {
-        required: ['date', 'account_id', 'product_type', 'days_overdue', 'outstanding_amount', 'region'],
+        required: ['customer_id', 'stage', 'stage_date', 'payment_status', 'issued_amount', 'total_due'],
         types: {
-          date: 'date',
-          account_id: 'string',
-          product_type: 'string',
-          days_overdue: 'integer',
-          outstanding_amount: 'number',
-          region: 'string'
+          customer_id: 'string',
+          funded_app_count: 'integer',
+          tier_name: 'string',
+          stage: 'string',
+          stage_date: 'date',
+          payment_status: 'string',
+          funded_date: 'date',
+          last_payment_date: 'date',
+          issued_amount: 'number',
+          total_due: 'number',
+          payment: 'number'
         },
         constraints: {
-          days_overdue: { min: 1, max: 9999 },
-          outstanding_amount: { min: 0, max: 10000000 },
-          account_id: { pattern: /^[A-Z0-9]{8,15}$/ }
+          funded_app_count: { min: 0, max: 1000 },
+          issued_amount: { min: 0, max: 10000000 },
+          total_due: { min: 0, max: 10000000 },
+          payment: { min: 0, max: 10000000 },
+          stage: { 
+            enum: LOAN_STAGES.filter(stage => 
+              !['Funded', 'Repaid'].includes(stage)
+            ) 
+          },
+          payment_status: { enum: PAYMENT_STATUSES },
+          tier_name: { enum: LEAD_SOURCES }
         }
       },
+
       [REPORT_TYPES.LIQUIDATIONS]: {
-        required: ['date', 'account_id', 'product_type', 'liquidation_amount', 'recovery_amount', 'status'],
+        required: ['funded_year', 'funded_month', 'funded', 'collected', 'actual_liquidation_rate', 'all_together'],
         types: {
-          date: 'date',
-          account_id: 'string',
-          product_type: 'string',
-          liquidation_amount: 'number',
-          recovery_amount: 'number',
-          status: 'string'
+          funded_year: 'integer',
+          funded_month: 'integer',
+          funded: 'number',
+          collected: 'number',
+          actual_liquidation_rate: 'percentage',
+          future_scheduled: 'number',
+          dmp_iva_collected: 'number',
+          all_together: 'number',
+          forecast_liquidation_rate: 'percentage',
+          total_due_not_scheduled: 'number'
         },
         constraints: {
-          liquidation_amount: { min: 0, max: 10000000 },
-          recovery_amount: { min: 0, max: 10000000 },
-          status: { enum: ['Pending', 'In Progress', 'Completed', 'Failed'] }
+          funded_year: { min: 2000, max: 2030 },
+          funded_month: { min: 1, max: 12 },
+          funded: { min: 0, max: 100000000 },
+          collected: { min: 0, max: 100000000 },
+          actual_liquidation_rate: { min: 0, max: 100 },
+          forecast_liquidation_rate: { min: 0, max: 100 },
+          future_scheduled: { min: 0, max: 100000000 },
+          dmp_iva_collected: { min: 0, max: 100000000 },
+          all_together: { min: 0, max: 100000000 },
+          total_due_not_scheduled: { min: 0, max: 100000000 }
         }
       },
+
       [REPORT_TYPES.CALL_CENTER]: {
-        required: ['date', 'agent_id', 'call_type', 'duration_minutes', 'resolution_status', 'satisfaction_score'],
-        types: {
-          date: 'date',
-          agent_id: 'string',
-          call_type: 'string',
-          duration_minutes: 'number',
-          resolution_status: 'string',
-          satisfaction_score: 'integer'
+        // Call Center has multiple file structures, so we define validation for each
+        report1: {
+          required: ['call_id', 'date_time', 'agent_name', 'disposition'],
+          types: {
+            call_id: 'string',
+            date_time: 'datetime',
+            agent_name: 'string',
+            answered_date_time: 'datetime',
+            from_number: 'string',
+            disposition: 'string',
+            talk_time: 'number'
+          },
+          constraints: {
+            disposition: { enum: CALL_DISPOSITIONS },
+            talk_time: { min: 0, max: 7200 }, // Max 2 hours
+            call_id: { pattern: /^[A-Za-z0-9-_]+$/ }
+          }
         },
-        constraints: {
-          duration_minutes: { min: 0, max: 300 },
-          satisfaction_score: { min: 1, max: 5 },
-          call_type: { enum: ['Support', 'Sales', 'Complaint', 'Information', 'Technical'] },
-          resolution_status: { enum: ['Resolved', 'Escalated', 'Pending', 'Transferred'] }
+        report2: {
+          required: ['phone_numbers', 'total_calls', 'total_call_duration', 'inbound_calls', 'outbound_calls'],
+          types: {
+            phone_numbers: 'string',
+            total_calls: 'integer',
+            total_call_duration: 'number',
+            inbound_calls: 'integer',
+            inbound_call_duration: 'number',
+            outbound_calls: 'integer',
+            outbound_call_duration: 'number',
+            missed_calls: 'integer'
+          },
+          constraints: {
+            total_calls: { min: 0, max: 10000 },
+            inbound_calls: { min: 0, max: 10000 },
+            outbound_calls: { min: 0, max: 10000 },
+            missed_calls: { min: 0, max: 10000 },
+            total_call_duration: { min: 0, max: 1000000 },
+            inbound_call_duration: { min: 0, max: 1000000 },
+            outbound_call_duration: { min: 0, max: 1000000 }
+          }
+        },
+        report3: {
+          required: ['call_id', 'date_time_earliest', 'duration', 'initial_direction'],
+          types: {
+            call_id: 'string',
+            date_time_earliest: 'datetime',
+            duration: 'number',
+            initial_direction: 'string',
+            inbound: 'integer',
+            outbound: 'integer'
+          },
+          constraints: {
+            initial_direction: { enum: CALL_DIRECTIONS },
+            duration: { min: 0, max: 7200 },
+            inbound: { min: 0, max: 100 },
+            outbound: { min: 0, max: 100 },
+            call_id: { pattern: /^[A-Za-z0-9-_]+$/ }
+          }
+        },
+        report4: {
+          required: ['date', 'fcr'],
+          types: {
+            date: 'date',
+            fcr: 'integer'
+          },
+          constraints: {
+            fcr: { min: 0, max: 10000 }
+          }
         }
       },
+
       [REPORT_TYPES.COMPLAINTS]: {
-        required: ['date', 'complaint_id', 'category', 'severity', 'status', 'days_to_resolve'],
+        required: ['customer_id', 'received_date', 'category'],
         types: {
-          date: 'date',
-          complaint_id: 'string',
+          customer_id: 'string',
+          count: 'integer',
+          received_date: 'date',
+          resolved_date: 'date',
+          days_to_resolve: 'integer',
           category: 'string',
-          severity: 'string',
-          status: 'string',
-          days_to_resolve: 'integer'
+          decision: 'string'
         },
         constraints: {
+          count: { min: 1, max: 100 },
           days_to_resolve: { min: 0, max: 365 },
-          severity: { enum: ['Low', 'Medium', 'High', 'Critical'] },
-          status: { enum: ['Open', 'In Progress', 'Resolved', 'Closed'] },
-          category: { enum: ['Service', 'Product', 'Billing', 'Technical', 'Process'] }
+          category: { enum: COMPLAINT_CATEGORIES },
+          decision: { enum: COMPLAINT_DECISIONS }
         }
       }
     };
   }
 
-  // Validate a single record
-  validateRecord(record, reportType, options = {}) {
-    const {
-      strict = true,
-      allowPartial = false,
-      customRules = null
-    } = options;
-
-    const errors = [];
-    const warnings = [];
-    
-    // Get validation rules for report type
-    const rules = customRules || this.validationRules[reportType];
-    if (!rules) {
-      return {
-        isValid: false,
-        errors: [`Unknown report type: ${reportType}`],
-        warnings: []
-      };
-    }
-
-    // Check required fields
-    if (!allowPartial) {
-      for (const field of rules.required) {
-        if (record[field] === undefined || record[field] === null || record[field] === '') {
-          errors.push(`Missing required field: ${field}`);
-        }
-      }
-    }
-
-    // Validate field types and constraints
-    for (const [field, value] of Object.entries(record)) {
-      if (value === undefined || value === null || value === '') {
-        continue; // Skip empty values (handled by required check)
-      }
-
-      // Type validation
-      if (rules.types && rules.types[field]) {
-        const typeValidation = this.validateFieldType(value, rules.types[field], field);
-        if (!typeValidation.isValid) {
-          errors.push(...typeValidation.errors);
-        }
-        if (typeValidation.warnings) {
-          warnings.push(...typeValidation.warnings);
-        }
-      }
-
-      // Constraint validation
-      if (rules.constraints && rules.constraints[field]) {
-        const constraintValidation = this.validateFieldConstraints(value, rules.constraints[field], field);
-        if (!constraintValidation.isValid) {
-          errors.push(...constraintValidation.errors);
-        }
-        if (constraintValidation.warnings) {
-          warnings.push(...constraintValidation.warnings);
-        }
-      }
-    }
-
-    // Business logic validation
-    const businessValidation = this.validateBusinessLogic(record, reportType);
-    if (!businessValidation.isValid) {
-      errors.push(...businessValidation.errors);
-    }
-    if (businessValidation.warnings) {
-      warnings.push(...businessValidation.warnings);
-    }
-
-    return {
-      isValid: errors.length === 0,
-      errors,
-      warnings,
-      record: this.sanitizeRecord(record, reportType)
-    };
-  }
-
-  // Validate field type
-  validateFieldType(value, expectedType, fieldName) {
+  // Validate a single record against report type rules
+  validateRecord(record, reportType, subType = null) {
     const errors = [];
     const warnings = [];
 
-    switch (expectedType) {
-      case 'string':
-        if (typeof value !== 'string') {
-          // Try to convert to string
-          if (value !== null && value !== undefined) {
-            warnings.push(`Field '${fieldName}' converted from ${typeof value} to string`);
-          } else {
-            errors.push(`Field '${fieldName}' must be a string`);
+    try {
+      // Get validation rules for the report type
+      let rules;
+      if (reportType === REPORT_TYPES.CALL_CENTER && subType) {
+        rules = this.validationRules[reportType][subType];
+      } else {
+        rules = this.validationRules[reportType];
+      }
+
+      if (!rules) {
+        errors.push(`No validation rules found for report type: ${reportType}`);
+        return { isValid: false, errors, warnings };
+      }
+
+      // Check required fields
+      if (rules.required) {
+        rules.required.forEach(field => {
+          if (!VALIDATION_RULES.required(record[field])) {
+            errors.push(`Required field '${field}' is missing or empty`);
           }
-        }
-        break;
+        });
+      }
 
-      case 'number':
-        const numValue = parseFloat(value);
-        if (isNaN(numValue)) {
-          errors.push(`Field '${fieldName}' must be a valid number`);
+      // Check data types and constraints
+      Object.keys(record).forEach(field => {
+        const value = record[field];
+        
+        if (value === null || value === undefined || value === '') {
+          return; // Skip empty values for non-required fields
         }
-        break;
 
-      case 'integer':
-        const intValue = parseInt(value);
-        if (isNaN(intValue) || intValue !== parseFloat(value)) {
-          errors.push(`Field '${fieldName}' must be a valid integer`);
-        }
-        break;
-
-      case 'date':
-        const dateValue = new Date(value);
-        if (isNaN(dateValue.getTime())) {
-          errors.push(`Field '${fieldName}' must be a valid date`);
-        } else {
-          // Check if date is reasonable (not too far in past/future)
-          const now = new Date();
-          const fiveYearsAgo = new Date(now.getFullYear() - 5, now.getMonth(), now.getDate());
-          const oneYearFuture = new Date(now.getFullYear() + 1, now.getMonth(), now.getDate());
+        // Type validation
+        if (rules.types && rules.types[field]) {
+          const expectedType = rules.types[field];
           
-          if (dateValue < fiveYearsAgo) {
-            warnings.push(`Field '${fieldName}' date is more than 5 years old`);
-          } else if (dateValue > oneYearFuture) {
-            warnings.push(`Field '${fieldName}' date is more than 1 year in the future`);
+          switch (expectedType) {
+            case 'string':
+              if (typeof value !== 'string') {
+                errors.push(`Field '${field}' must be a string`);
+              }
+              break;
+            case 'number':
+              if (!VALIDATION_RULES.isNumber(value)) {
+                errors.push(`Field '${field}' must be a valid number`);
+              }
+              break;
+            case 'integer':
+              if (!Number.isInteger(Number(value))) {
+                errors.push(`Field '${field}' must be an integer`);
+              }
+              break;
+            case 'date':
+              if (!VALIDATION_RULES.isDate(value)) {
+                errors.push(`Field '${field}' must be a valid date`);
+              }
+              break;
+            case 'datetime':
+              if (!VALIDATION_RULES.isDate(value)) {
+                errors.push(`Field '${field}' must be a valid date/time`);
+              }
+              break;
+            case 'percentage':
+              if (!VALIDATION_RULES.isNumber(value) || !VALIDATION_RULES.isPercentage(value)) {
+                errors.push(`Field '${field}' must be a valid percentage (0-100)`);
+              }
+              break;
           }
         }
-        break;
 
-      case 'boolean':
-        if (typeof value !== 'boolean' && value !== 'true' && value !== 'false' && value !== 0 && value !== 1) {
-          errors.push(`Field '${fieldName}' must be a boolean value`);
+        // Constraint validation
+        if (rules.constraints && rules.constraints[field]) {
+          const constraints = rules.constraints[field];
+          
+          if (constraints.min !== undefined && Number(value) < constraints.min) {
+            errors.push(`Field '${field}' must be at least ${constraints.min}`);
+          }
+          
+          if (constraints.max !== undefined && Number(value) > constraints.max) {
+            errors.push(`Field '${field}' must be at most ${constraints.max}`);
+          }
+          
+          if (constraints.enum && !constraints.enum.includes(value)) {
+            warnings.push(`Field '${field}' value '${value}' is not in expected list: ${constraints.enum.join(', ')}`);
+          }
+          
+          if (constraints.pattern && !constraints.pattern.test(value)) {
+            errors.push(`Field '${field}' format is invalid`);
+          }
         }
-        break;
+      });
 
-      default:
-        warnings.push(`Unknown type validation for field '${fieldName}': ${expectedType}`);
+      // Business rule validation
+      const businessRuleResult = this.validateBusinessRules(record, reportType, subType);
+      errors.push(...businessRuleResult.errors);
+      warnings.push(...businessRuleResult.warnings);
+
+    } catch (error) {
+      errors.push(`Validation error: ${error.message}`);
     }
 
     return {
@@ -238,254 +308,205 @@ class ValidationService {
     };
   }
 
-  // Validate field constraints
-  validateFieldConstraints(value, constraints, fieldName) {
-    const errors = [];
-    const warnings = [];
-
-    // Minimum value constraint
-    if (constraints.min !== undefined) {
-      const numValue = parseFloat(value);
-      if (!isNaN(numValue) && numValue < constraints.min) {
-        errors.push(`Field '${fieldName}' must be at least ${constraints.min}`);
-      }
-    }
-
-    // Maximum value constraint
-    if (constraints.max !== undefined) {
-      const numValue = parseFloat(value);
-      if (!isNaN(numValue) && numValue > constraints.max) {
-        errors.push(`Field '${fieldName}' must be at most ${constraints.max}`);
-      }
-    }
-
-    // Enum constraint
-    if (constraints.enum && Array.isArray(constraints.enum)) {
-      if (!constraints.enum.includes(value)) {
-        errors.push(`Field '${fieldName}' must be one of: ${constraints.enum.join(', ')}`);
-      }
-    }
-
-    // Pattern constraint
-    if (constraints.pattern && constraints.pattern instanceof RegExp) {
-      if (!constraints.pattern.test(String(value))) {
-        errors.push(`Field '${fieldName}' does not match required pattern`);
-      }
-    }
-
-    // Length constraints
-    if (constraints.minLength !== undefined) {
-      if (String(value).length < constraints.minLength) {
-        errors.push(`Field '${fieldName}' must be at least ${constraints.minLength} characters long`);
-      }
-    }
-
-    if (constraints.maxLength !== undefined) {
-      if (String(value).length > constraints.maxLength) {
-        errors.push(`Field '${fieldName}' must be at most ${constraints.maxLength} characters long`);
-      }
-    }
-
-    return {
-      isValid: errors.length === 0,
-      errors,
-      warnings
-    };
-  }
-
-  // Validate business logic rules
-  validateBusinessLogic(record, reportType) {
+  // Validate business rules specific to each report type
+  validateBusinessRules(record, reportType, subType = null) {
     const errors = [];
     const warnings = [];
 
     switch (reportType) {
+      case REPORT_TYPES.LENDING_VOLUME:
+      case REPORT_TYPES.ARREARS:
+        // Check if funded date is after stage date
+        if (record.funded_date && record.stage_date) {
+          const fundedDate = new Date(record.funded_date);
+          const stageDate = new Date(record.stage_date);
+          if (fundedDate < stageDate) {
+            warnings.push('Funded date is before stage date');
+          }
+        }
+        
+        // Check if total due is greater than issued amount for active loans
+        if (record.total_due && record.issued_amount && record.stage !== 'Repaid') {
+          if (Number(record.total_due) < Number(record.issued_amount)) {
+            warnings.push('Total due is less than issued amount for active loan');
+          }
+        }
+        break;
+
       case REPORT_TYPES.LIQUIDATIONS:
-        // Recovery amount should not exceed liquidation amount
-        if (record.recovery_amount && record.liquidation_amount) {
-          const recovery = parseFloat(record.recovery_amount);
-          const liquidation = parseFloat(record.liquidation_amount);
-          
-          if (!isNaN(recovery) && !isNaN(liquidation) && recovery > liquidation) {
-            errors.push('Recovery amount cannot exceed liquidation amount');
+        // Check if collected amount is reasonable compared to funded amount
+        if (record.collected && record.funded) {
+          const collectionRate = (Number(record.collected) / Number(record.funded)) * 100;
+          if (collectionRate > 100) {
+            warnings.push('Collection rate exceeds 100% of funded amount');
+          }
+        }
+        
+        // Check if actual rate matches calculated rate
+        if (record.collected && record.funded && record.actual_liquidation_rate) {
+          const calculatedRate = (Number(record.collected) / Number(record.funded)) * 100;
+          const actualRate = Number(record.actual_liquidation_rate);
+          if (Math.abs(calculatedRate - actualRate) > 1) {
+            warnings.push('Actual liquidation rate does not match calculated rate');
           }
         }
         break;
 
       case REPORT_TYPES.CALL_CENTER:
-        // Long duration calls with low satisfaction should be flagged
-        if (record.duration_minutes && record.satisfaction_score) {
-          const duration = parseFloat(record.duration_minutes);
-          const satisfaction = parseInt(record.satisfaction_score);
-          
-          if (!isNaN(duration) && !isNaN(satisfaction)) {
-            if (duration > 30 && satisfaction <= 2) {
-              warnings.push('Long call duration with low satisfaction score');
+        if (subType === 'report1') {
+          // Check if answered time is after call time
+          if (record.answered_date_time && record.date_time) {
+            const answerTime = new Date(record.answered_date_time);
+            const callTime = new Date(record.date_time);
+            if (answerTime < callTime) {
+              errors.push('Answered time cannot be before call time');
             }
           }
-        }
-        break;
-
-      case REPORT_TYPES.ARREARS:
-        // High overdue days with low outstanding amount might be data quality issue
-        if (record.days_overdue && record.outstanding_amount) {
-          const days = parseInt(record.days_overdue);
-          const amount = parseFloat(record.outstanding_amount);
           
-          if (!isNaN(days) && !isNaN(amount)) {
-            if (days > 90 && amount < 100) {
-              warnings.push('High overdue days with very low outstanding amount');
-            }
+          // Check if disposition matches talk time
+          if (record.disposition === 'Answered' && (!record.talk_time || Number(record.talk_time) === 0)) {
+            warnings.push('Answered call should have talk time greater than 0');
+          }
+        }
+        
+        if (subType === 'report2') {
+          // Check if total calls equals inbound + outbound
+          const totalCalls = Number(record.total_calls) || 0;
+          const inboundCalls = Number(record.inbound_calls) || 0;
+          const outboundCalls = Number(record.outbound_calls) || 0;
+          
+          if (totalCalls !== (inboundCalls + outboundCalls)) {
+            warnings.push('Total calls does not equal sum of inbound and outbound calls');
           }
         }
         break;
 
       case REPORT_TYPES.COMPLAINTS:
-        // Critical complaints should be resolved quickly
-        if (record.severity && record.days_to_resolve && record.status) {
-          const days = parseInt(record.days_to_resolve);
-          
-          if (!isNaN(days) && record.severity === 'Critical' && days > 7 && record.status === 'Resolved') {
-            warnings.push('Critical complaint took more than 7 days to resolve');
+        // Check if resolved date is after received date
+        if (record.resolved_date && record.received_date) {
+          const resolvedDate = new Date(record.resolved_date);
+          const receivedDate = new Date(record.received_date);
+          if (resolvedDate < receivedDate) {
+            errors.push('Resolved date cannot be before received date');
           }
+          
+          // Check if days to resolve matches date difference
+          if (record.days_to_resolve) {
+            const actualDays = Math.floor((resolvedDate - receivedDate) / (1000 * 60 * 60 * 24));
+            const recordedDays = Number(record.days_to_resolve);
+            if (Math.abs(actualDays - recordedDays) > 1) {
+              warnings.push('Days to resolve does not match date difference');
+            }
+          }
+        }
+        
+        // Check if resolved complaints have a decision
+        if (record.resolved_date && !record.decision) {
+          warnings.push('Resolved complaints should have a decision');
         }
         break;
     }
 
-    return {
-      isValid: errors.length === 0,
-      errors,
-      warnings
-    };
+    return { errors, warnings };
   }
 
-  // Validate batch of records
-  validateBatch(records, reportType, options = {}) {
-    const {
-      stopOnError = false,
-      maxErrors = 100,
-      progressCallback = null
-    } = options;
-
+  // Validate entire dataset
+  validateDataset(data, reportType, subType = null) {
     const results = {
-      totalRecords: records.length,
-      validRecords: [],
-      invalidRecords: [],
+      isValid: true,
+      totalRecords: data.length,
+      validRecords: 0,
+      invalidRecords: 0,
+      errors: [],
       warnings: [],
-      summary: {
-        valid: 0,
-        invalid: 0,
-        totalErrors: 0,
-        totalWarnings: 0
-      }
+      recordErrors: []
     };
 
-    for (let i = 0; i < records.length; i++) {
-      // Progress callback
-      if (progressCallback && i % 100 === 0) {
-        progressCallback({
-          current: i,
-          total: records.length,
-          valid: results.summary.valid,
-          invalid: results.summary.invalid
-        });
-      }
-
-      const validation = this.validateRecord(records[i], reportType, options);
+    data.forEach((record, index) => {
+      const validation = this.validateRecord(record, reportType, subType);
       
       if (validation.isValid) {
-        results.validRecords.push({
-          index: i,
-          record: validation.record,
-          warnings: validation.warnings
-        });
-        results.summary.valid++;
+        results.validRecords++;
       } else {
-        results.invalidRecords.push({
-          index: i,
-          record: records[i],
+        results.invalidRecords++;
+        results.isValid = false;
+        results.recordErrors.push({
+          rowIndex: index + 1,
           errors: validation.errors,
           warnings: validation.warnings
         });
-        results.summary.invalid++;
-        results.summary.totalErrors += validation.errors.length;
       }
-
-      results.summary.totalWarnings += validation.warnings.length;
-
-      // Stop on error if requested
-      if (stopOnError && !validation.isValid) {
-        break;
-      }
-
-      // Stop if max errors reached
-      if (results.summary.totalErrors >= maxErrors) {
-        results.truncated = true;
-        break;
-      }
-    }
-
-    // Final progress callback
-    if (progressCallback) {
-      progressCallback({
-        current: results.totalRecords,
-        total: results.totalRecords,
-        valid: results.summary.valid,
-        invalid: results.summary.invalid,
-        completed: true
-      });
-    }
+      
+      // Collect all errors and warnings
+      results.errors.push(...validation.errors);
+      results.warnings.push(...validation.warnings);
+    });
 
     return results;
   }
 
-  // Sanitize and format record
-  sanitizeRecord(record, reportType) {
-    const sanitized = { ...record };
-    const rules = this.validationRules[reportType];
+  // Sanitize and normalize data
+  sanitizeData(data, reportType, subType = null) {
+    return data.map(record => {
+      const sanitized = {};
+      
+      Object.keys(record).forEach(field => {
+        let value = record[field];
+        
+        // Skip empty values
+        if (value === null || value === undefined || value === '') {
+          sanitized[field] = null;
+          return;
+        }
 
-    if (!rules) return sanitized;
+        // Get field type
+        let rules;
+        if (reportType === REPORT_TYPES.CALL_CENTER && subType) {
+          rules = this.validationRules[reportType][subType];
+        } else {
+          rules = this.validationRules[reportType];
+        }
 
-    // Type conversions and sanitization
-    for (const [field, value] of Object.entries(sanitized)) {
-      if (value === undefined || value === null || value === '') {
-        continue;
-      }
+        const fieldType = rules?.types?.[field];
 
-      if (rules.types && rules.types[field]) {
-        switch (rules.types[field]) {
+        // Sanitize based on type
+        switch (fieldType) {
           case 'string':
             sanitized[field] = String(value).trim();
             break;
           case 'number':
-            const numValue = parseFloat(value);
-            if (!isNaN(numValue)) {
-              sanitized[field] = numValue;
-            }
-            break;
           case 'integer':
-            const intValue = parseInt(value);
-            if (!isNaN(intValue)) {
-              sanitized[field] = intValue;
-            }
+            const numValue = Number(value);
+            sanitized[field] = isNaN(numValue) ? null : numValue;
+            break;
+          case 'percentage':
+            const pctValue = Number(value);
+            sanitized[field] = isNaN(pctValue) ? null : Math.min(100, Math.max(0, pctValue));
             break;
           case 'date':
+          case 'datetime':
             const dateValue = new Date(value);
             if (!isNaN(dateValue.getTime())) {
-              sanitized[field] = dateValue.toISOString().split('T')[0]; // YYYY-MM-DD format
-            }
-            break;
-          case 'boolean':
-            if (typeof value === 'string') {
-              sanitized[field] = value.toLowerCase() === 'true';
+              sanitized[field] = dateValue.toISOString();
             } else {
-              sanitized[field] = Boolean(value);
+              sanitized[field] = null;
             }
             break;
+          default:
+            sanitized[field] = value;
         }
-      }
-    }
+      });
 
-    return sanitized;
+      return sanitized;
+    });
+  }
+
+  // Get validation schema for report type
+  getValidationSchema(reportType, subType = null) {
+    if (reportType === REPORT_TYPES.CALL_CENTER && subType) {
+      return this.validationRules[reportType]?.[subType] || null;
+    }
+    return this.validationRules[reportType] || null;
   }
 
   // Add custom validator
@@ -497,130 +518,22 @@ class ValidationService {
   removeCustomValidator(name) {
     return this.customValidators.delete(name);
   }
-
-  // Validate with custom validator
-  validateWithCustom(record, validatorName, options = {}) {
-    const validator = this.customValidators.get(validatorName);
-    if (!validator) {
-      throw new Error(`Custom validator '${validatorName}' not found`);
-    }
-
-    return validator(record, options);
-  }
-
-  // Get validation schema for report type
-  getValidationSchema(reportType) {
-    return this.validationRules[reportType] || null;
-  }
-
-  // Update validation rules
-  updateValidationRules(reportType, rules) {
-    this.validationRules[reportType] = {
-      ...this.validationRules[reportType],
-      ...rules
-    };
-  }
-
-  // Validate file format before processing
-  validateFileFormat(file, expectedType = 'csv') {
-    const errors = [];
-    const warnings = [];
-
-    // Check file existence
-    if (!file) {
-      errors.push('No file provided');
-      return { isValid: false, errors, warnings };
-    }
-
-    // Check file size (max 50MB)
-    const maxSize = 50 * 1024 * 1024;
-    if (file.size > maxSize) {
-      errors.push(`File size (${formatters.formatFileSize(file.size)}) exceeds maximum allowed size (${formatters.formatFileSize(maxSize)})`);
-    }
-
-    // Check file type
-    const allowedTypes = {
-      csv: ['text/csv', 'application/csv', 'text/plain'],
-      excel: ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'],
-      json: ['application/json', 'text/json']
-    };
-
-    const allowedExtensions = {
-      csv: ['.csv', '.txt'],
-      excel: ['.xlsx', '.xls'],
-      json: ['.json']
-    };
-
-    if (expectedType && allowedTypes[expectedType]) {
-      const fileName = file.name.toLowerCase();
-      const fileExtension = fileName.substring(fileName.lastIndexOf('.'));
-      
-      const validMimeType = allowedTypes[expectedType].includes(file.type);
-      const validExtension = allowedExtensions[expectedType].includes(fileExtension);
-
-      if (!validMimeType && !validExtension) {
-        errors.push(`Invalid file type. Expected ${expectedType.toUpperCase()} file`);
-      } else if (!validMimeType) {
-        warnings.push('File MIME type may not be correctly set, but extension is valid');
-      }
-    }
-
-    return {
-      isValid: errors.length === 0,
-      errors,
-      warnings
-    };
-  }
-
-  // Generate validation report
-  generateValidationReport(validationResults, reportType) {
-    const report = {
-      reportType,
-      timestamp: new Date().toISOString(),
-      summary: validationResults.summary,
-      validationRules: this.validationRules[reportType],
-      details: {
-        validRecords: validationResults.validRecords.length,
-        invalidRecords: validationResults.invalidRecords.length,
-        errorBreakdown: {},
-        warningBreakdown: {}
-      }
-    };
-
-    // Analyze error patterns
-    validationResults.invalidRecords.forEach(invalid => {
-      invalid.errors.forEach(error => {
-        report.details.errorBreakdown[error] = (report.details.errorBreakdown[error] || 0) + 1;
-      });
-    });
-
-    // Analyze warning patterns
-    [...validationResults.validRecords, ...validationResults.invalidRecords].forEach(record => {
-      if (record.warnings) {
-        record.warnings.forEach(warning => {
-          report.details.warningBreakdown[warning] = (report.details.warningBreakdown[warning] || 0) + 1;
-        });
-      }
-    });
-
-    return report;
-  }
-
-  // Get validation statistics
-  getValidationStats() {
-    return {
-      supportedReportTypes: Object.keys(this.validationRules),
-      customValidators: Array.from(this.customValidators.keys()),
-      validationRulesSummary: Object.entries(this.validationRules).map(([type, rules]) => ({
-        type,
-        requiredFields: rules.required.length,
-        typedFields: Object.keys(rules.types || {}).length,
-        constrainedFields: Object.keys(rules.constraints || {}).length
-      }))
-    };
-  }
 }
 
-// Create and export singleton instance
+// Create singleton instance
 const validationService = new ValidationService();
-export default validationService; 
+
+export default validationService;
+
+// Export individual functions for convenience
+export const validateRecord = (record, reportType, subType) => 
+  validationService.validateRecord(record, reportType, subType);
+  
+export const validateDataset = (data, reportType, subType) => 
+  validationService.validateDataset(data, reportType, subType);
+  
+export const sanitizeData = (data, reportType, subType) => 
+  validationService.sanitizeData(data, reportType, subType);
+  
+export const getValidationSchema = (reportType, subType) => 
+  validationService.getValidationSchema(reportType, subType);

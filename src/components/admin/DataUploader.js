@@ -9,7 +9,7 @@ const DataUploader = ({
   onUploadComplete,
   onUploadProgress,
   defaultReportType = null,
-  allowedTypes = Object.keys(REPORT_TYPES),
+  allowedTypes = Object.values(REPORT_TYPES),
   maxFileSize = 10 * 1024 * 1024, // 10MB
   className = ""
 }) => {
@@ -195,6 +195,23 @@ const DataUploader = ({
     fileInputRef.current?.click();
   };
 
+	const getReportDisplayName = (reportTypeValue) => {
+		// Find the key that matches this value
+		const reportKey = Object.keys(REPORT_TYPES).find(
+		key => REPORT_TYPES[key] === reportTypeValue
+	);
+  
+	// Convert key to display name (e.g., "LENDING_VOLUME" -> "Lending Volume")
+	if (reportKey) {
+		return reportKey
+		.split('_')
+		.map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+		.join(' ');
+	}
+  
+	return reportTypeValue;
+	};
+
   const canUpload = uploadState.file && 
                    uploadState.reportType && 
                    uploadState.validationResult?.isValid && 
@@ -217,11 +234,11 @@ const DataUploader = ({
           disabled={uploadState.isUploading}
         >
           <option value="">Select report type...</option>
-          {allowedTypes.map(type => (
-            <option key={type} value={type}>
-              {REPORT_TYPES[type]?.name || type}
-            </option>
-          ))}
+          {allowedTypes.map(reportTypeValue => (
+			<option key={reportTypeValue} value={reportTypeValue}>
+				{getReportDisplayName(reportTypeValue)}
+			</option>
+			))}
         </select>
       </div>
 

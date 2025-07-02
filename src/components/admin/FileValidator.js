@@ -1,7 +1,8 @@
-// src/components/admin/FileValidator.js
-import React, { useState, useEffect } from 'react';
-import { validateCSVStructure, validateDataTypes, validateBusinessRules } from '../../utils/csvProcessor';
+// src/components/admin/FileValidator.js - COMPLETE FIXED VERSION
+import React, { useState, useEffect, useCallback } from 'react';
 import { REPORT_CONFIGS } from '../../config/reportConfig';
+import { COLUMN_MAPPINGS } from '../../utils/constants';
+import Papa from 'papaparse';
 
 const FileValidator = ({ 
   file, 
@@ -19,21 +20,214 @@ const FileValidator = ({
     details: null
   });
 
-  // Auto-validate when file or reportType changes
-  useEffect(() => {
-    if (autoValidate && file && reportType) {
-      validateFile();
-    }
-  }, [file, reportType, autoValidate]);
+  // Helper function to read file content
+  const readFileContent = useCallback((file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target.result);
+      reader.onerror = (e) => reject(new Error('Failed to read file'));
+      reader.readAsText(file);
+    });
+  }, []);
 
-  // Update parent component with validation results
-  useEffect(() => {
-    if (onValidation) {
-      onValidation(validationState);
-    }
-  }, [validationState, onValidation]);
+  // Helper function to parse CSV using Papa Parse
+  const parseCSV = useCallback(async (content) => {
+    return new Promise((resolve, reject) => {
+      Papa.parse(content, {
+        header: true,
+        skipEmptyLines: true,
+        dynamicTyping: true,
+        complete: (results) => {
+          if (results.errors.length > 0) {
+            reject(new Error(`CSV parsing error: ${results.errors[0].message}`));
+          } else {
+            resolve(results.data);
+          }
+        },
+        error: (error) => {
+          reject(new Error(`CSV parsing failed: ${error.message}`));
+        }
+      });
+    });
+  }, []);
 
-  const validateFile = async () => {
+  // Generate validation summary
+  const generateValidationSummary = useCallback((data, errors, warnings) => {
+    return {
+      totalRows: data.length,
+      validRows: data.length - errors.filter(e => e.type === 'ROW_ERROR').length,
+      errorCount: errors.length,
+      warningCount: warnings.length,
+      fileSize: file ? `${(file.size / 1024).toFixed(1)} KB` : 'Unknown',
+      fileName: file ? file.name : 'Unknown'
+    };
+  }, [file]);
+
+  // CSV structure validation with column mappings
+  const validateCSVStructure = useCallback((csvData, reportConfig) => {
+    const errors = [];
+    const warnings = [];
+
+    if (!csvData || csvData.length === 0) {
+      errors.push({
+        type: 'STRUCTURE',
+        message: 'No data found in CSV file',
+        severity: 'error'
+      });
+      return { errors, warnings };
+    }
+
+    // Get CSV headers
+    const csvHeaders = Object.keys(csvData[0] || {});
+    console.log('CSV Headers found:', csvHeaders);
+
+    // Get required fields
+    const requiredFields = Object.entries(reportConfig.fields)
+      .filter(([key, config]) => config.required)
+      .map(([key]) => key);
+
+    console.log('Required fields:', requiredFields);
+
+    // Check for missing required fields using column mappings
+    const missingFields = requiredFields.filter(field => {
+      // Get possible column variations for this field
+      const possibleColumns = COLUMN_MAPPINGS[field] || [field];
+      console.log(`Checking field '${field}' against variations:`, possibleColumns);
+      
+      // Check if any variation exists in CSV headers
+      const found = possibleColumns.some(variation => 
+        csvHeaders.some(header => 
+          header.toLowerCase() === variation.toLowerCase()
+        )
+      );
+      
+      console.log(`Field '${field}' found: ${found}`);
+      return !found;
+    });
+
+    if (missingFields.length > 0) {
+      missingFields.forEach(field => {
+        const possibleColumns = COLUMN_MAPPINGS[field] || [field];
+        errors.push({
+          type: 'MISSING_FIELD',
+          message: `Required field '${field}' not found. Expected one of: ${possibleColumns.join(', ')}`,
+          severity: 'error'
+        });
+      });
+    }
+
+    // Check for empty data
+    const nonEmptyRows = csvData.filter(row => 
+      Object.values(row).some(value => value !== null && value !== undefined && value !== '')
+    );
+
+    if (nonEmptyRows.length === 0) {
+      errors.push({
+        type: 'NO_DATA',
+        message: 'No valid data rows found',
+        severity: 'error'
+      });
+    }
+
+    return { errors, warnings };
+  }, []);
+
+  // Basic data type validation
+  const validateDataTypes = useCallback((csvData, reportConfig) => {
+    const errors = [];
+    const warnings = [];
+
+    csvData.forEach((row, index) => {
+      Object.entries(reportConfig.fields).forEach(([fieldName, fieldConfig]) => {
+        // Find the actual CSV header that maps to this field
+        const possibleColumns = COLUMN_MAPPINGS[fieldName] || [fieldName];
+        const csvHeaders = Object.keys(row);
+        const actualHeader = possibleColumns.find(variation => 
+          csvHeaders.some(header => 
+            header.toLowerCase() === variation.toLowerCase()
+          )
+        );
+
+        if (!actualHeader) return; // Field not found in CSV
+
+        // Get the actual header name from CSV
+        const csvHeaderName = csvHeaders.find(header => 
+          header.toLowerCase() === actualHeader.toLowerCase()
+        );
+
+        const value = row[csvHeaderName];
+        
+        // Skip validation for empty optional fields
+        if (!fieldConfig.required && (value === null || value === undefined || value === '')) {
+          return;
+        }
+
+        // Skip validation for empty required fields (already caught by structure validation)
+        if (value === null || value === undefined || value === '') {
+          return;
+        }
+
+        // Basic type checking
+        switch (fieldConfig.type) {
+          case 'number':
+          case 'currency':
+            if (isNaN(Number(value))) {
+              errors.push({
+                type: 'TYPE_ERROR',
+                message: `Row ${index + 1}: '${csvHeaderName}' must be a number, got '${value}'`,
+                severity: 'error',
+                row: index + 1
+              });
+            }
+            break;
+          
+          case 'date':
+          case 'datetime':
+            if (isNaN(Date.parse(value))) {
+              errors.push({
+                type: 'TYPE_ERROR',
+                message: `Row ${index + 1}: '${csvHeaderName}' must be a valid date, got '${value}'`,
+                severity: 'error',
+                row: index + 1
+              });
+            }
+            break;
+
+          case 'percentage':
+            const numValue = Number(value);
+            if (isNaN(numValue) || numValue < 0 || numValue > 100) {
+              errors.push({
+                type: 'TYPE_ERROR',
+                message: `Row ${index + 1}: '${csvHeaderName}' must be a percentage (0-100), got '${value}'`,
+                severity: 'error',
+                row: index + 1
+              });
+            }
+            break;
+
+		default:
+    
+			break;
+	}
+      });
+    });
+
+    return { errors, warnings };
+  }, []);
+
+  // Basic business rules validation
+  const validateBusinessRules = useCallback((csvData, reportConfig) => {
+    const errors = [];
+    const warnings = [];
+
+    // Add any business-specific validation here
+    // For now, just return empty arrays
+    
+    return { errors, warnings };
+  }, []);
+
+  // Main validation function
+  const validateFile = useCallback(async () => {
     if (!file || !reportType) return;
 
     setValidationState(prev => ({
@@ -45,9 +239,17 @@ const FileValidator = ({
     }));
 
     try {
+      console.log('Validating file for report type:', reportType);
+      
       const reportConfig = REPORT_CONFIGS[reportType];
       if (!reportConfig) {
         throw new Error(`Unknown report type: ${reportType}`);
+      }
+
+      console.log('Report config found:', reportConfig);
+
+      if (!reportConfig.fields) {
+        throw new Error(`No fields configuration found for report type: ${reportType}`);
       }
 
       // Read file content
@@ -56,6 +258,8 @@ const FileValidator = ({
       // Parse CSV
       const csvData = await parseCSV(fileContent);
       
+      console.log('CSV data parsed:', csvData.length, 'rows');
+
       // Run validation steps
       const structureValidation = validateCSVStructure(csvData, reportConfig);
       const dataTypeValidation = validateDataTypes(csvData, reportConfig);
@@ -79,6 +283,8 @@ const FileValidator = ({
       // Generate summary
       const summary = generateValidationSummary(csvData, allErrors, allWarnings);
 
+      console.log('Validation complete. Errors:', allErrors.length, 'Warnings:', allWarnings.length);
+
       setValidationState({
         isValidating: false,
         isValid,
@@ -95,6 +301,7 @@ const FileValidator = ({
       });
 
     } catch (error) {
+      console.error('Validation error:', error);
       setValidationState(prev => ({
         ...prev,
         isValidating: false,
@@ -106,47 +313,21 @@ const FileValidator = ({
         }]
       }));
     }
-  };
+  }, [file, reportType, readFileContent, parseCSV, generateValidationSummary, validateCSVStructure, validateDataTypes, validateBusinessRules]);
 
-  const readFileContent = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e) => resolve(e.target.result);
-      reader.onerror = (e) => reject(new Error('Failed to read file'));
-      reader.readAsText(file);
-    });
-  };
-
-  const parseCSV = async (content) => {
-    // Simple CSV parser - in real implementation, use Papa Parse
-    const lines = content.split('\n').filter(line => line.trim());
-    if (lines.length === 0) throw new Error('File is empty');
-
-    const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
-    const data = [];
-
-    for (let i = 1; i < lines.length; i++) {
-      const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
-      const row = {};
-      headers.forEach((header, index) => {
-        row[header] = values[index] || '';
-      });
-      data.push(row);
+  // Auto-validate when file or reportType changes
+  useEffect(() => {
+    if (autoValidate && file && reportType) {
+      validateFile();
     }
+  }, [autoValidate, file, reportType, validateFile]);
 
-    return data;
-  };
-
-  const generateValidationSummary = (data, errors, warnings) => {
-    return {
-      totalRows: data.length,
-      validRows: data.length - errors.filter(e => e.type === 'ROW_ERROR').length,
-      errorCount: errors.length,
-      warningCount: warnings.length,
-      fileSize: file ? `${(file.size / 1024).toFixed(1)} KB` : 'Unknown',
-      fileName: file ? file.name : 'Unknown'
-    };
-  };
+  // Update parent component with validation results
+  useEffect(() => {
+    if (onValidation) {
+      onValidation(validationState);
+    }
+  }, [validationState, onValidation]);
 
   const getValidationIcon = () => {
     if (validationState.isValidating) return '⏳';
@@ -247,11 +428,7 @@ const FileValidator = ({
               <div className="message-list">
                 {validationState.warnings.map((warning, index) => (
                   <div key={index} className="message-item warning-item">
-                    <span className="message-type">{warning.type}</span>
-                    <span className="message-text">{warning.message}</span>
-                    {warning.row && (
-                      <span className="message-location">Row {warning.row}</span>
-                    )}
+                    <span className="message-text">{warning.message || warning}</span>
                   </div>
                 ))}
               </div>
@@ -259,226 +436,8 @@ const FileValidator = ({
           )}
         </div>
       )}
-
-      {/* Success Message */}
-      {validationState.isValid === true && validationState.errors.length === 0 && (
-        <div className="success-message">
-          <span className="success-icon">✅</span>
-          <span className="success-text">
-            File validation passed! Ready to upload {validationState.summary?.totalRows} rows.
-          </span>
-        </div>
-      )}
-
-      <style jsx>{`
-        .file-validator {
-          background: #fff;
-          border: 1px solid #e2e8f0;
-          border-radius: 8px;
-          padding: 16px;
-        }
-
-        .validation-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 16px;
-        }
-
-        .validation-status {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-
-        .status-icon {
-          font-size: 18px;
-        }
-
-        .status-text {
-          font-weight: 600;
-          font-size: 14px;
-        }
-
-        .validate-btn {
-          background: #3182ce;
-          color: white;
-          border: none;
-          padding: 8px 16px;
-          border-radius: 4px;
-          font-size: 14px;
-          cursor: pointer;
-          transition: background 0.2s;
-        }
-
-        .validate-btn:hover:not(:disabled) {
-          background: #2c5aa0;
-        }
-
-        .validate-btn:disabled {
-          background: #a0aec0;
-          cursor: not-allowed;
-        }
-
-        .file-summary {
-          background: #f7fafc;
-          border: 1px solid #e2e8f0;
-          border-radius: 6px;
-          padding: 12px;
-          margin-bottom: 16px;
-        }
-
-        .summary-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-          gap: 12px;
-        }
-
-        .summary-item {
-          display: flex;
-          flex-direction: column;
-          gap: 2px;
-        }
-
-        .summary-label {
-          font-size: 12px;
-          color: #718096;
-          font-weight: 500;
-        }
-
-        .summary-value {
-          font-size: 14px;
-          color: #2d3748;
-          font-weight: 600;
-        }
-
-        .validation-results {
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
-        }
-
-        .section-title {
-          font-size: 14px;
-          font-weight: 600;
-          margin: 0 0 8px 0;
-          display: flex;
-          align-items: center;
-          gap: 6px;
-        }
-
-        .error-title {
-          color: #e53e3e;
-        }
-
-        .warning-title {
-          color: #d69e2e;
-        }
-
-        .message-list {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-        }
-
-        .message-item {
-          padding: 10px 12px;
-          border-radius: 4px;
-          display: flex;
-          flex-wrap: wrap;
-          gap: 8px;
-          align-items: center;
-          font-size: 13px;
-        }
-
-        .error-item {
-          background: #fed7d7;
-          border: 1px solid #feb2b2;
-          color: #c53030;
-        }
-
-        .warning-item {
-          background: #fefcbf;
-          border: 1px solid #f6e05e;
-          color: #975a16;
-        }
-
-        .message-type {
-          background: rgba(0,0,0,0.1);
-          padding: 2px 6px;
-          border-radius: 3px;
-          font-size: 11px;
-          font-weight: 600;
-          text-transform: uppercase;
-        }
-
-        .message-text {
-          flex: 1;
-          min-width: 200px;
-        }
-
-        .message-location {
-          background: rgba(0,0,0,0.1);
-          padding: 2px 6px;
-          border-radius: 3px;
-          font-size: 11px;
-          font-weight: 500;
-        }
-
-        .success-message {
-          background: #c6f6d5;
-          border: 1px solid #9ae6b4;
-          color: #276749;
-          padding: 12px;
-          border-radius: 6px;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-
-        .success-icon {
-          font-size: 16px;
-        }
-
-        .success-text {
-          font-size: 14px;
-          font-weight: 500;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-          .validation-header {
-            flex-direction: column;
-            align-items: stretch;
-            gap: 12px;
-          }
-
-          .summary-grid {
-            grid-template-columns: repeat(2, 1fr);
-          }
-
-          .message-item {
-            flex-direction: column;
-            align-items: flex-start;
-          }
-
-          .message-text {
-            min-width: auto;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .summary-grid {
-            grid-template-columns: 1fr;
-          }
-
-          .file-validator {
-            padding: 12px;
-          }
-        }
-      `}</style>
     </div>
   );
 };
 
-export default FileValidator; 
+export default FileValidator;
