@@ -129,4 +129,4 @@ export class ErrorBoundary extends React.Component {
   }
 }
 
-export default LoadingSpinner;
+export default ErrorBoundary;  // ✅ Correct

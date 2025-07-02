@@ -74,98 +74,49 @@ function App() {
       <ThemeProvider>
         <DataProvider>
           <FilterProvider>
-            <Router basename={process.env.NODE_ENV === 'production' ? '/financial-reports-app' : ''}>
-              <div className="App">
-                <Layout>
-                  <main className="main-content">
-                    <Routes>
-                      {/* Default route - redirect to overview */}
-                      <Route path="/" element={<Navigate to="/overview" replace />} />
-                      
-                      {/* Dashboard routes */}
-                      <Route 
-                        path="/overview" 
-                        element={
-                          <RouteLoader>
-                            <OverviewDashboard />
-                          </RouteLoader>
-                        } 
-                      />
-                      
-                      <Route 
-                        path="/lending" 
-                        element={
-                          <RouteLoader>
-                            <LendingDashboard />
-                          </RouteLoader>
-                        } 
-                      />
-                      
-                      <Route 
-                        path="/arrears" 
-                        element={
-                          <RouteLoader>
-                            <ArrearsDashboard />
-                          </RouteLoader>
-                        } 
-                      />
-                      
-                      <Route 
-                        path="/liquidations" 
-                        element={
-                          <RouteLoader>
-                            <LiquidationsDashboard />
-                          </RouteLoader>
-                        } 
-                      />
-                      
-                      <Route 
-                        path="/call-center" 
-                        element={
-                          <RouteLoader>
-                            <CallCenterDashboard />
-                          </RouteLoader>
-                        } 
-                      />
-                      
-                      <Route 
-                        path="/complaints" 
-                        element={
-                          <RouteLoader>
-                            <ComplaintsDashboard />
-                          </RouteLoader>
-                        } 
-                      />
-                      
-                      {/* Admin route - protected */}
-                      <Route 
-                        path="/admin" 
-                        element={
-                          <ProtectedRoute requiresAdmin={true}>
-                            <RouteLoader>
-                              <AdminPanel />
-                            </RouteLoader>
-                          </ProtectedRoute>
-                        } 
-                      />
-                      
-                      {/* Catch-all route for 404s */}
-                      <Route 
-                        path="*" 
-                        element={
-                          <div className="not-found">
-                            <h1>Page Not Found</h1>
-                            <p>The page you're looking for doesn't exist.</p>
-                            <button onClick={() => window.history.back()} className="btn btn-primary">
-                              Go Back
-                            </button>
-                          </div>
-                        } 
-                      />
-                    </Routes>
-                  </main>
-                </Layout>
-              </div>
+            <Router basename={process.env.NODE_ENV === 'production' ? '/dashboard' : ''}>
+              <Layout>
+                <Routes>
+                  <Route path="/" element={
+                    <RouteLoader>
+                      <OverviewDashboard />
+                    </RouteLoader>
+                  } />
+                  <Route path="/lending" element={
+                    <RouteLoader>
+                      <LendingDashboard />
+                    </RouteLoader>
+                  } />
+                  <Route path="/arrears" element={
+                    <RouteLoader>
+                      <ArrearsDashboard />
+                    </RouteLoader>
+                  } />
+                  <Route path="/liquidations" element={
+                    <RouteLoader>
+                      <LiquidationsDashboard />
+                    </RouteLoader>
+                  } />
+                  <Route path="/call-center" element={
+                    <RouteLoader>
+                      <CallCenterDashboard />
+                    </RouteLoader>
+                  } />
+                  <Route path="/complaints" element={
+                    <RouteLoader>
+                      <LiquidationsDashboard />
+                    </RouteLoader>
+                  } />
+                  <Route path="/admin" element={
+                    <ProtectedRoute requiresAdmin={true}>
+                      <RouteLoader>
+                        <AdminPanel />
+                      </RouteLoader>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </Layout>
             </Router>
           </FilterProvider>
         </DataProvider>

@@ -1,8 +1,10 @@
 // src/components/common/Navigation.js
+import { useNavigate } from 'react-router-dom';
 import React, { useState } from 'react';
 import { REPORT_CONFIG } from '../../config/reportConfig';
 
-const Navigation = ({ currentPath, onNavigate }) => {
+const Navigation = ({ currentPath }) => {
+	const navigate = useNavigate();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const navigationItems = [
@@ -30,10 +32,8 @@ const Navigation = ({ currentPath, onNavigate }) => {
   ];
 
   const handleNavigate = (item) => {
-    if (onNavigate) {
-      onNavigate(item.path, item);
-    }
-  };
+    navigate(item.path);
+    };
 
   const toggleCollapsed = () => {
     setIsCollapsed(!isCollapsed);

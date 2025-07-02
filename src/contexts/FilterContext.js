@@ -226,23 +226,23 @@ export const FilterProvider = ({ children }) => {
   const filterHook = useFilters(currentReportData, activeReport);
 
   // Apply global filters to current report hook
-  useEffect(() => {
-    if (state.filterMode === 'global' && state.autoApply) {
-      // Apply global date range
-      if (state.globalFilters.dateRange.start && state.globalFilters.dateRange.end) {
-        filterHook.setDateRange(
-          state.globalFilters.dateRange.start,
-          state.globalFilters.dateRange.end,
-          state.globalFilters.dateRange.preset
-        );
-      }
+//  useEffect(() => {
+//    if (state.filterMode === 'global' && state.autoApply) {
+//      // Apply global date range
+//      if (state.globalFilters.dateRange.start && state.globalFilters.dateRange.end) {
+//        filterHook.setDateRange(
+//          state.globalFilters.dateRange.start,
+//          state.globalFilters.dateRange.end,
+//          state.globalFilters.dateRange.preset
+//        );
+//      }
 
-      // Apply global search
-      if (state.globalFilters.search) {
-        filterHook.setSearch(state.globalFilters.search);
-      }
-    }
-  }, [state.globalFilters, state.filterMode, state.autoApply, filterHook]);
+//      // Apply global search
+//      if (state.globalFilters.search) {
+//        filterHook.setSearch(state.globalFilters.search);
+//      }
+//    }
+//  }, [state.globalFilters, state.filterMode, state.autoApply, filterHook]);
 
   // Set global date range
   const setGlobalDateRange = useCallback((start, end, preset = 'custom') => {
@@ -579,34 +579,34 @@ export const FilterProvider = ({ children }) => {
     }
   }, [setFilterMode, setAutoApply]);
 
-  // Update active filter count when state changes
-  useEffect(() => {
-    const count = calculateActiveFilterCount();
-    const summary = getFilterSummary();
-    
-    dispatch({
-      type: FILTER_ACTIONS.UPDATE_ACTIVE_COUNT,
-      count,
-      summary
-    });
-  }, [calculateActiveFilterCount, getFilterSummary]);
+// Update active filter count when state changes
+//  useEffect(() => {
+//    const count = calculateActiveFilterCount();
+//    const summary = getFilterSummary();
+//    
+//    dispatch({
+//      type: FILTER_ACTIONS.UPDATE_ACTIVE_COUNT,
+//      count,
+//      summary
+//    });
+//  }, [calculateActiveFilterCount, getFilterSummary]);
 
-  // Sync with localStorage preferences on mount
-  useEffect(() => {
-    if (savedPreferences.filterMode) {
-      dispatch({ type: FILTER_ACTIONS.SET_FILTER_MODE, mode: savedPreferences.filterMode });
-    }
-    if (typeof savedPreferences.autoApply === 'boolean') {
-      dispatch({ type: FILTER_ACTIONS.SET_AUTO_APPLY, autoApply: savedPreferences.autoApply });
-    }
+// Sync with localStorage preferences on mount
+//  useEffect(() => {
+//    if (savedPreferences.filterMode) {
+//      dispatch({ type: FILTER_ACTIONS.SET_FILTER_MODE, mode: savedPreferences.filterMode });
+//    }
+//    if (typeof savedPreferences.autoApply === 'boolean') {
+//      dispatch({ type: FILTER_ACTIONS.SET_AUTO_APPLY, autoApply: savedPreferences.autoApply });
+//    }
     
-    // Load saved filter sets
-    if (savedPreferences.savedSets) {
-      Object.entries(savedPreferences.savedSets).forEach(([name, filterSet]) => {
-        dispatch({ type: FILTER_ACTIONS.SAVE_FILTER_SET, name });
-      });
-    }
-  }, [savedPreferences]);
+//    // Load saved filter sets
+//    if (savedPreferences.savedSets) {
+//      Object.entries(savedPreferences.savedSets).forEach(([name, filterSet]) => {
+//        dispatch({ type: FILTER_ACTIONS.SAVE_FILTER_SET, name });
+//      });
+//    }
+//  }, [savedPreferences]);
 
   // Context value
   const contextValue = {

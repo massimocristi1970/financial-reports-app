@@ -1,3 +1,4 @@
+	  
 /* src/styles/globals.css */
 
 /* ============================================================================
@@ -39,41 +40,40 @@
   --color-gray-700: #334155;
   --color-gray-800: #1e293b;
   --color-gray-900: #0f172a;
+  }
+  
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Background Colors for Dark Mode */
+    --bg-primary: var(--color-gray-900);
+    --bg-secondary: var(--color-gray-800);
+    --bg-tertiary: var(--color-gray-700);
+    --bg-card: var(--color-gray-800);
+    --bg-overlay: rgba(0, 0, 0, 0.7);
+    --bg-sidebar: var(--color-gray-900);
+    --bg-header: var(--color-gray-800);
 
-  /* Background Colors */
-  --bg-primary: var(--color-white);
-  --bg-secondary: var(--color-gray-50);
-  --bg-tertiary: var(--color-gray-100);
-  --bg-card: var(--color-white);
-  --bg-overlay: rgba(0, 0, 0, 0.5);
-  --bg-sidebar: var(--color-gray-900);
-  --bg-header: var(--color-white);
+    /* Text Colors for Dark Mode */
+    --text-primary: var(--color-gray-100);
+    --text-secondary: var(--color-gray-300);
+    --text-tertiary: var(--color-gray-400);
+    --text-inverse: var(--color-gray-900);
 
-  /* Text Colors */
-  --text-primary: var(--color-gray-900);
-  --text-secondary: var(--color-gray-600);
-  --text-tertiary: var(--color-gray-500);
-  --text-inverse: var(--color-white);
-  --text-link: var(--color-primary);
-  --text-link-hover: var(--color-primary-dark);
+    /* Border Colors for Dark Mode */
+    --border-primary: var(--color-gray-700);
+    --border-secondary: var(--color-gray-600);
 
-  /* Border Colors */
-  --border-primary: var(--color-gray-200);
-  --border-secondary: var(--color-gray-300);
-  --border-focus: var(--color-primary);
-  --border-error: var(--color-error);
-  --border-success: var(--color-success);
-
-  /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-
+    /* Shadows for Dark Mode */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
+    --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+  }
+}
   /* Typography */
-  --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-  --font-family-mono: 'JetBrains Mono', 'Fira Code', 'Monaco', 'Cascadia Code', 'Roboto Mono', monospace;
+  --font-family-sans: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --font-family-mono: 'Consolas', 'Monaco', 'Courier New', monospace;
   
   /* Font Sizes */
   --font-size-xs: 0.75rem;    /* 12px */
@@ -161,24 +161,8 @@
   --breakpoint-lg: 1024px;
   --breakpoint-xl: 1280px;
   --breakpoint-2xl: 1536px;
-}
 
-/* Dark Theme Variables */
-[data-theme="dark"] {
-  --bg-primary: var(--color-gray-900);
-  --bg-secondary: var(--color-gray-800);
-  --bg-tertiary: var(--color-gray-700);
-  --bg-card: var(--color-gray-800);
-  --bg-sidebar: var(--color-gray-900);
-  --bg-header: var(--color-gray-800);
 
-  --text-primary: var(--color-gray-100);
-  --text-secondary: var(--color-gray-300);
-  --text-tertiary: var(--color-gray-400);
-
-  --border-primary: var(--color-gray-700);
-  --border-secondary: var(--color-gray-600);
-}
 
 /* ============================================================================
    GLOBAL RESETS AND BASE STYLES
@@ -202,7 +186,7 @@ html {
 }
 
 body {
-  font-family: var(--font-family-sans);
+  font-family: var(--font-family-sans) !important;
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-normal);
   line-height: var(--line-height-normal);
