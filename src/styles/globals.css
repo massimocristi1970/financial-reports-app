@@ -601,3 +601,8 @@ em, i {
     page-break-after: avoid;
   }
 } 
+
+/* Force font override - add at the very bottom */
+* {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+}
