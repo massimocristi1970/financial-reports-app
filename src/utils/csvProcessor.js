@@ -1,4 +1,4 @@
-// src/utils/csvProcessor.js
+// src/utils/csvProcessor.js - Enhanced version with UK date/currency support
 import Papa from 'papaparse';
 import { COLUMN_MAPPINGS, VALIDATION_RULES, ERROR_MESSAGES } from './constants';
 import { REPORT_CONFIG } from '../config/reportConfig';
@@ -9,6 +9,83 @@ export class CSVProcessor {
     this.config = REPORT_CONFIG[reportType];
     this.errors = [];
     this.warnings = [];
+  }
+
+  // Helper function to validate and parse UK dates (DD/MM/YYYY)
+  static isValidUKDate(dateString) {
+    if (!dateString || typeof dateString !== 'string') return false;
+    
+    const cleaned = dateString.trim();
+    const ukDatePattern = /^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})$/;
+    const match = cleaned.match(ukDatePattern);
+    
+    if (!match) return false;
+    
+    const [, day, month, year] = match;
+    const dayNum = parseInt(day, 10);
+    const monthNum = parseInt(month, 10);
+    const yearNum = parseInt(year, 10);
+    
+    // Basic range checks
+    if (dayNum < 1 || dayNum > 31) return false;
+    if (monthNum < 1 || monthNum > 12) return false;
+    if (yearNum < 1900 || yearNum > 2100) return false;
+    
+    // Create date object and validate
+    const dateObj = new Date(yearNum, monthNum - 1, dayNum);
+    return dateObj.getDate() === dayNum && 
+           dateObj.getMonth() === monthNum - 1 && 
+           dateObj.getFullYear() === yearNum;
+  }
+
+  // Helper function to parse UK date to ISO format
+  static parseUKDate(dateString) {
+    const ukDatePattern = /^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})$/;
+    const match = dateString.trim().match(ukDatePattern);
+    
+    if (match) {
+      const [, day, month, year] = match;
+      return new Date(year, month - 1, day);
+    }
+    
+    // Try standard Date.parse as fallback
+    return new Date(dateString);
+  }
+
+  // Helper function to validate currency values (£1,000, $1000, etc.)
+  static isValidCurrency(value) {
+    if (!value || typeof value !== 'string') return false;
+    
+    const cleaned = value.trim()
+      .replace(/[£$€¥]/g, '') // Remove currency symbols
+      .replace(/,/g, '') // Remove commas
+      .replace(/\s/g, ''); // Remove whitespace
+    
+    return !isNaN(parseFloat(cleaned)) && isFinite(parseFloat(cleaned));
+  }
+
+  // Helper function to parse currency to number
+  static parseCurrency(value) {
+    if (!value) return 0;
+    
+    if (typeof value === 'number') return value;
+    
+    const cleaned = value.toString().trim()
+      .replace(/[£$€¥]/g, '')
+      .replace(/,/g, '')
+      .replace(/\s/g, '');
+    
+    return parseFloat(cleaned) || 0;
+  }
+
+  // Helper function to parse number with commas
+  static parseNumber(value) {
+    if (!value) return 0;
+    
+    if (typeof value === 'number') return value;
+    
+    const cleaned = value.toString().trim().replace(/,/g, '');
+    return parseFloat(cleaned) || 0;
   }
 
   // Main processing function
@@ -55,17 +132,27 @@ export class CSVProcessor {
     }
   }
 
-  // Parse CSV file
+  // Parse CSV file with proper settings
   parseFile(file) {
     return new Promise((resolve, reject) => {
       Papa.parse(file, {
         header: true,
         skipEmptyLines: true,
         trimHeaders: true,
-        dynamicTyping: false, // Keep as strings for validation
+        dynamicTyping: false, // Keep as strings for proper validation
+        transform: (value, header) => {
+          // Trim all values
+          return typeof value === 'string' ? value.trim() : value;
+        },
         complete: (results) => {
           if (results.errors.length > 0) {
-            reject(new Error(`CSV parsing errors: ${results.errors.map(e => e.message).join(', ')}`));
+            const criticalErrors = results.errors.filter(e => e.type === 'Delimiter');
+            if (criticalErrors.length > 0) {
+              reject(new Error(`CSV parsing errors: ${criticalErrors.map(e => e.message).join(', ')}`));
+            } else {
+              // Non-critical errors, continue
+              resolve(results.data);
+            }
           } else {
             resolve(results.data);
           }
@@ -86,7 +173,7 @@ export class CSVProcessor {
     const headers = Object.keys(data[0]);
     const mappedHeaders = {};
 
-    // Map each required field
+    // Map each field using the column mappings
     Object.keys(this.config.fields).forEach(standardField => {
       const mapping = COLUMN_MAPPINGS[standardField];
       if (mapping) {
@@ -122,7 +209,7 @@ export class CSVProcessor {
     });
   }
 
-  // Validate data against field requirements
+  // Enhanced validation with UK format support
   validateData(data) {
     const validatedData = [];
     
@@ -130,233 +217,299 @@ export class CSVProcessor {
       const validatedRow = { ...row };
       let hasErrors = false;
 
-      // Check required fields
+      // Check each field according to its configuration
       Object.entries(this.config.fields).forEach(([fieldName, fieldConfig]) => {
         const value = row[fieldName];
         
+        // Check required fields
         if (fieldConfig.required && !VALIDATION_RULES.required(value)) {
           this.errors.push(`Row ${row._rowIndex}: ${fieldConfig.label} is required`);
           hasErrors = true;
           return;
         }
 
-        if (value && value !== '') {
-          // Validate by field type
-          switch (fieldConfig.type) {
-            case 'date':
-              if (!this.validateDate(value)) {
-                this.errors.push(`Row ${row._rowIndex}: Invalid date format in ${fieldConfig.label}`);
-                hasErrors = true;
-              } else {
-                validatedRow[fieldName] = this.parseDate(value);
-              }
-              break;
+        // Skip validation for empty optional fields
+        if (!value || value === '') {
+          return;
+        }
 
-            case 'number':
-            case 'currency':
-              if (!VALIDATION_RULES.isNumber(value)) {
-                this.errors.push(`Row ${row._rowIndex}: Invalid number in ${fieldConfig.label}`);
-                hasErrors = true;
-              } else {
-                validatedRow[fieldName] = parseFloat(value);
-              }
-              break;
+        // Validate and transform by field type
+        switch (fieldConfig.type) {
+          case 'date':
+            if (CSVProcessor.isValidUKDate(value)) {
+              validatedRow[fieldName] = CSVProcessor.parseUKDate(value);
+            } else if (!isNaN(Date.parse(value))) {
+              validatedRow[fieldName] = new Date(value);
+            } else {
+              this.errors.push(`Row ${row._rowIndex}: Invalid date format in ${fieldConfig.label} - expected DD/MM/YYYY or standard date format`);
+              hasErrors = true;
+            }
+            break;
 
-            case 'percentage':
-              if (!VALIDATION_RULES.isPercentage(value)) {
-                this.errors.push(`Row ${row._rowIndex}: Invalid percentage in ${fieldConfig.label}`);
-                hasErrors = true;
-              } else {
-                validatedRow[fieldName] = parseFloat(value);
-              }
-              break;
+          case 'currency':
+            if (CSVProcessor.isValidCurrency(value)) {
+              validatedRow[fieldName] = CSVProcessor.parseCurrency(value);
+            } else {
+              this.errors.push(`Row ${row._rowIndex}: Invalid currency format in ${fieldConfig.label} - '${value}'`);
+              hasErrors = true;
+            }
+            break;
 
-            case 'category':
-            case 'string':
-              validatedRow[fieldName] = value.toString().trim();
-              break;
+          case 'number':
+            const numberValue = CSVProcessor.parseNumber(value);
+            if (!isNaN(numberValue) && isFinite(numberValue)) {
+              validatedRow[fieldName] = numberValue;
+            } else {
+              this.errors.push(`Row ${row._rowIndex}: Invalid number in ${fieldConfig.label} - '${value}'`);
+              hasErrors = true;
+            }
+            break;
 
-            default:
-              validatedRow[fieldName] = value;
-          }
+          case 'percentage':
+            let percentValue = value;
+            if (typeof value === 'string' && value.includes('%')) {
+              percentValue = parseFloat(value.replace('%', '').trim());
+            } else {
+              percentValue = parseFloat(value);
+            }
+            
+            if (!isNaN(percentValue) && percentValue >= 0 && percentValue <= 100) {
+              validatedRow[fieldName] = percentValue;
+            } else {
+              this.errors.push(`Row ${row._rowIndex}: Invalid percentage in ${fieldConfig.label} - must be 0-100`);
+              hasErrors = true;
+            }
+            break;
+
+          case 'string':
+          default:
+            // For string fields, just ensure they're not empty if required
+            validatedRow[fieldName] = value;
+            break;
         }
       });
 
+      // Only include rows without critical errors
       if (!hasErrors) {
         validatedData.push(validatedRow);
       }
     });
 
-    if (validatedData.length === 0) {
-      throw new Error('No valid records found after validation');
-    }
-
     return validatedData;
   }
 
-  // Process and enrich data
+  // Process and enrich the validated data
   processData(data) {
     return data.map(row => {
       const processedRow = { ...row };
 
-      // Add calculated fields based on report type
+      // Add computed fields based on report type
       switch (this.reportType) {
-        case 'arrears':
-          processedRow.days_overdue_bucket = this.getArrearsBucket(row.days_overdue);
+        case 'lending-volume':
+          // Add any lending-specific calculations
+          if (processedRow.IssuedAmount && processedRow.Payment) {
+            processedRow.remainingBalance = processedRow.IssuedAmount - processedRow.Payment;
+          }
           break;
 
-        case 'call-center':
-          if (row.calls_received && row.calls_answered) {
-            processedRow.service_level = (row.calls_answered / row.calls_received) * 100;
+        case 'arrears':
+          // Add arrears-specific calculations
+          if (processedRow.TotalDue && processedRow.Payment) {
+            processedRow.outstandingAmount = processedRow.TotalDue - processedRow.Payment;
           }
           break;
 
         case 'liquidations':
-          if (row.recovery_rate && typeof row.recovery_rate === 'string' && row.recovery_rate.includes('%')) {
-            processedRow.recovery_rate = parseFloat(row.recovery_rate.replace('%', ''));
+          // Add liquidation-specific calculations
+          if (processedRow.liquidation_amount && processedRow.recovery_amount) {
+            processedRow.recovery_rate = (processedRow.recovery_amount / processedRow.liquidation_amount) * 100;
           }
           break;
 
         default:
+          // No specific processing for other report types
           break;
       }
-
-      // Add metadata
-      processedRow._processed_date = new Date().toISOString();
-      processedRow._id = this.generateRowId(row);
 
       return processedRow;
     });
   }
 
-  // Helper functions
-  validateDate(value) {
-    // Try multiple date formats
-    const formats = [
-      /^\d{4}-\d{2}-\d{2}$/, // YYYY-MM-DD
-      /^\d{2}\/\d{2}\/\d{4}$/, // DD/MM/YYYY
-      /^\d{2}-\d{2}-\d{4}$/, // DD-MM-YYYY
-    ];
-
-    return formats.some(format => format.test(value)) && !isNaN(Date.parse(value));
-  }
-
-  parseDate(value) {
-    // Handle different date formats
-    if (value.includes('/')) {
-      const parts = value.split('/');
-      if (parts.length === 3) {
-        // Assume DD/MM/YYYY
-        return new Date(parts[2], parts[1] - 1, parts[0]).toISOString().split('T')[0];
-      }
-    }
-    
-    return new Date(value).toISOString().split('T')[0];
-  }
-
-  getArrearsBucket(daysOverdue) {
-    const days = parseInt(daysOverdue);
-    if (days === 0) return 'Current';
-    if (days <= 30) return '1-30 days';
-    if (days <= 60) return '31-60 days';
-    if (days <= 90) return '61-90 days';
-    return '90+ days';
-  }
-
-  generateRowId(row) {
-    // Create unique ID based on key fields
-    const keyFields = ['date', 'account_id', 'complaint_id'].filter(field => row[field]);
-    const keyString = keyFields.map(field => row[field]).join('_');
-    return btoa(keyString).replace(/[+/=]/g, '').substring(0, 10);
-  }
-
+  // Generate processing statistics
   generateStats(data) {
-    return {
+    const stats = {
       totalRows: data.length,
-      dateRange: this.getDateRange(data),
-      fieldCoverage: this.getFieldCoverage(data),
-      duplicateCount: this.getDuplicateCount(data)
+      errorCount: this.errors.length,
+      warningCount: this.warnings.length,
+      dataTypes: {},
+      fieldCoverage: {}
     };
-  }
 
-  getDateRange(data) {
-    const dates = data
-      .map(row => row.date)
-      .filter(date => date)
-      .sort();
-    
-    return {
-      earliest: dates[0] || null,
-      latest: dates[dates.length - 1] || null
-    };
-  }
-
-  getFieldCoverage(data) {
-    const coverage = {};
-    
-    Object.keys(this.config.fields).forEach(field => {
-      const populatedCount = data.filter(row => row[field] && row[field] !== '').length;
-      coverage[field] = {
-        populated: populatedCount,
-        percentage: (populatedCount / data.length) * 100
+    // Analyze field coverage
+    Object.keys(this.config.fields).forEach(fieldName => {
+      const nonEmptyCount = data.filter(row => 
+        row[fieldName] !== null && 
+        row[fieldName] !== undefined && 
+        row[fieldName] !== ''
+      ).length;
+      
+      stats.fieldCoverage[fieldName] = {
+        populated: nonEmptyCount,
+        percentage: Math.round((nonEmptyCount / data.length) * 100)
       };
     });
 
-    return coverage;
+    // Analyze data types found
+    if (data.length > 0) {
+      Object.keys(data[0]).forEach(field => {
+        if (field !== '_rowIndex') {
+          const sampleValues = data.slice(0, 100).map(row => row[field]).filter(v => v != null);
+          const types = [...new Set(sampleValues.map(v => typeof v))];
+          stats.dataTypes[field] = types;
+        }
+      });
+    }
+
+    return stats;
   }
 
-  getDuplicateCount(data) {
-    const seen = new Set();
-    let duplicates = 0;
-
-    data.forEach(row => {
-      const key = row._id;
-      if (seen.has(key)) {
-        duplicates++;
-      } else {
-        seen.add(key);
+  // Static method for quick validation without full processing
+  static async quickValidate(file, reportType) {
+    const processor = new CSVProcessor(reportType);
+    
+    try {
+      processor.validateFile(file);
+      const rawData = await processor.parseFile(file);
+      
+      if (!rawData || rawData.length === 0) {
+        return { isValid: false, error: 'No data found in file' };
       }
-    });
 
-    return duplicates;
+      // Check for basic structure
+      const headers = Object.keys(rawData[0]);
+      const requiredFields = Object.entries(processor.config.fields)
+        .filter(([, config]) => config.required)
+        .map(([field]) => field);
+
+      const missingFields = requiredFields.filter(field => {
+        const mapping = COLUMN_MAPPINGS[field] || [field];
+        return !mapping.some(variant => 
+          headers.some(header => 
+            header.toLowerCase().trim() === variant.toLowerCase().trim()
+          )
+        );
+      });
+
+      if (missingFields.length > 0) {
+        return { 
+          isValid: false, 
+          error: `Missing required fields: ${missingFields.join(', ')}` 
+        };
+      }
+
+      return { isValid: true, rowCount: rawData.length };
+      
+    } catch (error) {
+      return { isValid: false, error: error.message };
+    }
   }
 }
 
-// Utility functions for external use
-export const processCSV = async (file, reportType) => {
+// Enhanced utility functions for data processing
+export const processCSVFile = async (file, reportType, progressCallback) => {
   const processor = new CSVProcessor(reportType);
-  return await processor.processFile(file);
+  
+  if (progressCallback) progressCallback(10, 'Starting file processing...');
+  
+  try {
+    const result = await processor.processFile(file);
+    
+    if (progressCallback) {
+      if (result.success) {
+        progressCallback(100, 'Processing complete');
+      } else {
+        progressCallback(0, `Processing failed: ${result.error}`);
+      }
+    }
+    
+    return result;
+  } catch (error) {
+    if (progressCallback) {
+      progressCallback(0, `Processing error: ${error.message}`);
+    }
+    
+    return {
+      success: false,
+      error: error.message,
+      errors: [error.message],
+      warnings: []
+    };
+  }
 };
 
-export const validateCSVStructure = (headers, reportType) => {
-  const config = REPORT_CONFIG[reportType];
-  const requiredFields = Object.entries(config.fields)
-    .filter(([_, fieldConfig]) => fieldConfig.required)
-    .map(([fieldName, _]) => fieldName);
+// Helper function to validate a single row of data
+export const validateRowData = (rowData, reportType) => {
+  const processor = new CSVProcessor(reportType);
+  const errors = [];
+  
+  Object.entries(processor.config.fields).forEach(([fieldName, fieldConfig]) => {
+    const value = rowData[fieldName];
+    
+    if (fieldConfig.required && !value) {
+      errors.push(`${fieldConfig.label} is required`);
+      return;
+    }
 
-  const missingFields = requiredFields.filter(field => {
-    const mapping = COLUMN_MAPPINGS[field] || [field];
-    return !headers.some(header => 
-      mapping.some(variant => 
-        header.toLowerCase().trim() === variant.toLowerCase().trim()
-      )
-    );
+    if (!value) return;
+
+    switch (fieldConfig.type) {
+      case 'date':
+        if (!CSVProcessor.isValidUKDate(value) && isNaN(Date.parse(value))) {
+          errors.push(`${fieldConfig.label} must be a valid date`);
+        }
+        break;
+      case 'currency':
+        if (!CSVProcessor.isValidCurrency(value)) {
+          errors.push(`${fieldConfig.label} must be a valid currency amount`);
+        }
+        break;
+      case 'number':
+        if (isNaN(CSVProcessor.parseNumber(value))) {
+          errors.push(`${fieldConfig.label} must be a valid number`);
+        }
+        break;
+    }
   });
+  
+  return { isValid: errors.length === 0, errors };
+};
 
-  return {
-    valid: missingFields.length === 0,
-    missingFields,
-    suggestions: missingFields.map(field => ({
-      field,
-      suggestions: COLUMN_MAPPINGS[field] || [field]
-    }))
-  };
+// Export utility functions for use in other components
+export const dateUtils = {
+  isValidUKDate: CSVProcessor.isValidUKDate,
+  parseUKDate: CSVProcessor.parseUKDate,
+  formatUKDate: (date) => {
+    if (!date) return '';
+    const d = new Date(date);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}/${month}/${year}`;
+  }
+};
+
+export const currencyUtils = {
+  isValidCurrency: CSVProcessor.isValidCurrency,
+  parseCurrency: CSVProcessor.parseCurrency,
+  formatCurrency: (amount, currency = 'GBP') => {
+    if (amount == null || isNaN(amount)) return '';
+    return new Intl.NumberFormat('en-GB', {
+      style: 'currency',
+      currency: currency,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
+  }
 };
 
 export default CSVProcessor;
-
-// Additional exports for compatibility
-export const processCSVFile = processCSV;
-export const validateDataTypes = () => ({ isValid: true, errors: [], warnings: [] });
-export const validateBusinessRules = () => ({ isValid: true, errors: [], warnings: [] });
-export const validateData = () => ({ isValid: true, errors: [], warnings: [] });

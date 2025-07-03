@@ -1,4 +1,4 @@
-// src/components/admin/FileValidator.js - COMPLETE FIXED VERSION
+// src/components/admin/FileValidator.js - FIXED VERSION with UK date/currency support
 import React, { useState, useEffect, useCallback } from 'react';
 import { REPORT_CONFIGS } from '../../config/reportConfig';
 import { COLUMN_MAPPINGS } from '../../utils/constants';
@@ -20,6 +20,77 @@ const FileValidator = ({
     details: null
   });
 
+  // Helper function to validate UK date formats (DD/MM/YYYY, DD-MM-YYYY, etc.)
+  const isValidUKDate = useCallback((dateString) => {
+    if (!dateString || typeof dateString !== 'string') return false;
+    
+    // Clean the date string
+    const cleaned = dateString.trim();
+    
+    // UK date patterns: DD/MM/YYYY, DD-MM-YYYY, DD.MM.YYYY
+    const ukDatePattern = /^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})$/;
+    const match = cleaned.match(ukDatePattern);
+    
+    if (!match) return false;
+    
+    const [, day, month, year] = match;
+    const dayNum = parseInt(day, 10);
+    const monthNum = parseInt(month, 10);
+    const yearNum = parseInt(year, 10);
+    
+    // Basic range checks
+    if (dayNum < 1 || dayNum > 31) return false;
+    if (monthNum < 1 || monthNum > 12) return false;
+    if (yearNum < 1900 || yearNum > 2100) return false;
+    
+    // Create date object (month is 0-indexed in JS)
+    const dateObj = new Date(yearNum, monthNum - 1, dayNum);
+    
+    // Check if the date is valid (handles Feb 29, etc.)
+    return dateObj.getDate() === dayNum && 
+           dateObj.getMonth() === monthNum - 1 && 
+           dateObj.getFullYear() === yearNum;
+  }, []);
+
+  // Helper function to validate and parse currency values
+  const isValidCurrency = useCallback((value) => {
+    if (!value || typeof value !== 'string') return false;
+    
+    // Remove currency symbols, commas, and whitespace
+    const cleaned = value.trim()
+      .replace(/[£$€¥]/g, '') // Remove currency symbols
+      .replace(/,/g, '') // Remove commas
+      .replace(/\s/g, ''); // Remove whitespace
+    
+    // Check if what's left is a valid number
+    return !isNaN(parseFloat(cleaned)) && isFinite(parseFloat(cleaned));
+  }, []);
+
+  // Helper function to parse currency value to number
+  const parseCurrency = useCallback((value) => {
+    if (!value || typeof value !== 'string') return 0;
+    
+    const cleaned = value.trim()
+      .replace(/[£$€¥]/g, '')
+      .replace(/,/g, '')
+      .replace(/\s/g, '');
+    
+    return parseFloat(cleaned) || 0;
+  }, []);
+
+  // Helper function to parse UK date to ISO format
+  const parseUKDate = useCallback((dateString) => {
+    const ukDatePattern = /^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})$/;
+    const match = dateString.trim().match(ukDatePattern);
+    
+    if (match) {
+      const [, day, month, year] = match;
+      return new Date(year, month - 1, day).toISOString().split('T')[0];
+    }
+    
+    return null;
+  }, []);
+
   // Helper function to read file content
   const readFileContent = useCallback((file) => {
     return new Promise((resolve, reject) => {
@@ -36,10 +107,21 @@ const FileValidator = ({
       Papa.parse(content, {
         header: true,
         skipEmptyLines: true,
-        dynamicTyping: true,
+        trimHeaders: true,
+        dynamicTyping: false, // Keep as strings for proper validation
+        transform: (value, header) => {
+          // Trim whitespace from all values
+          return typeof value === 'string' ? value.trim() : value;
+        },
         complete: (results) => {
           if (results.errors.length > 0) {
-            reject(new Error(`CSV parsing error: ${results.errors[0].message}`));
+            const criticalErrors = results.errors.filter(e => e.type === 'Delimiter');
+            if (criticalErrors.length > 0) {
+              reject(new Error(`CSV parsing error: ${criticalErrors[0].message}`));
+            } else {
+              // Non-critical errors, continue with data
+              resolve(results.data);
+            }
           } else {
             resolve(results.data);
           }
@@ -51,88 +133,60 @@ const FileValidator = ({
     });
   }, []);
 
-  // Generate validation summary
-  const generateValidationSummary = useCallback((data, errors, warnings) => {
-    return {
-      totalRows: data.length,
-      validRows: data.length - errors.filter(e => e.type === 'ROW_ERROR').length,
-      errorCount: errors.length,
-      warningCount: warnings.length,
-      fileSize: file ? `${(file.size / 1024).toFixed(1)} KB` : 'Unknown',
-      fileName: file ? file.name : 'Unknown'
-    };
-  }, [file]);
-
-  // CSV structure validation with column mappings
+  // Validate CSV structure and required columns
   const validateCSVStructure = useCallback((csvData, reportConfig) => {
     const errors = [];
     const warnings = [];
 
     if (!csvData || csvData.length === 0) {
       errors.push({
-        type: 'STRUCTURE',
+        type: 'NO_DATA',
         message: 'No data found in CSV file',
         severity: 'error'
       });
       return { errors, warnings };
     }
 
-    // Get CSV headers
-    const csvHeaders = Object.keys(csvData[0] || {});
+    const csvHeaders = Object.keys(csvData[0]);
     console.log('CSV Headers found:', csvHeaders);
 
-    // Get required fields
-    const requiredFields = Object.entries(reportConfig.fields)
-      .filter(([key, config]) => config.required)
-      .map(([key]) => key);
+    // Check for required fields
+    const missingRequired = [];
+    Object.entries(reportConfig.fields).forEach(([fieldName, fieldConfig]) => {
+      if (fieldConfig.required) {
+        const possibleColumns = COLUMN_MAPPINGS[fieldName] || [fieldName];
+        console.log(`Checking required field '${fieldName}' with possible columns:`, possibleColumns);
+        
+        const foundColumn = possibleColumns.find(variation => 
+          csvHeaders.some(header => 
+            header.toLowerCase().trim() === variation.toLowerCase().trim()
+          )
+        );
 
-    console.log('Required fields:', requiredFields);
-
-    // Check for missing required fields using column mappings
-    const missingFields = requiredFields.filter(field => {
-      // Get possible column variations for this field
-      const possibleColumns = COLUMN_MAPPINGS[field] || [field];
-      console.log(`Checking field '${field}' against variations:`, possibleColumns);
-      
-      // Check if any variation exists in CSV headers
-      const found = possibleColumns.some(variation => 
-        csvHeaders.some(header => 
-          header.toLowerCase() === variation.toLowerCase()
-        )
-      );
-      
-      console.log(`Field '${field}' found: ${found}`);
-      return !found;
+        if (!foundColumn) {
+          missingRequired.push({
+            field: fieldName,
+            label: fieldConfig.label,
+            possibleColumns: possibleColumns
+          });
+        }
+      }
     });
 
-    if (missingFields.length > 0) {
-      missingFields.forEach(field => {
-        const possibleColumns = COLUMN_MAPPINGS[field] || [field];
+    if (missingRequired.length > 0) {
+      missingRequired.forEach(missing => {
         errors.push({
-          type: 'MISSING_FIELD',
-          message: `Required field '${field}' not found. Expected one of: ${possibleColumns.join(', ')}`,
+          type: 'MISSING_REQUIRED_FIELD',
+          message: `Required field '${missing.label}' not found. Expected one of: ${missing.possibleColumns.join(', ')}`,
           severity: 'error'
         });
-      });
-    }
-
-    // Check for empty data
-    const nonEmptyRows = csvData.filter(row => 
-      Object.values(row).some(value => value !== null && value !== undefined && value !== '')
-    );
-
-    if (nonEmptyRows.length === 0) {
-      errors.push({
-        type: 'NO_DATA',
-        message: 'No valid data rows found',
-        severity: 'error'
       });
     }
 
     return { errors, warnings };
   }, []);
 
-  // Basic data type validation
+  // Enhanced data type validation with UK format support
   const validateDataTypes = useCallback((csvData, reportConfig) => {
     const errors = [];
     const warnings = [];
@@ -142,17 +196,17 @@ const FileValidator = ({
         // Find the actual CSV header that maps to this field
         const possibleColumns = COLUMN_MAPPINGS[fieldName] || [fieldName];
         const csvHeaders = Object.keys(row);
-        const actualHeader = possibleColumns.find(variation => 
+        const matchedVariation = possibleColumns.find(variation => 
           csvHeaders.some(header => 
-            header.toLowerCase() === variation.toLowerCase()
+            header.toLowerCase().trim() === variation.toLowerCase().trim()
           )
         );
 
-        if (!actualHeader) return; // Field not found in CSV
+        if (!matchedVariation) return; // Field not found in CSV
 
         // Get the actual header name from CSV
         const csvHeaderName = csvHeaders.find(header => 
-          header.toLowerCase() === actualHeader.toLowerCase()
+          header.toLowerCase().trim() === matchedVariation.toLowerCase().trim()
         );
 
         const value = row[csvHeaderName];
@@ -167,53 +221,87 @@ const FileValidator = ({
           return;
         }
 
-        // Basic type checking
+        // Enhanced type checking with UK format support
         switch (fieldConfig.type) {
           case 'number':
-          case 'currency':
-            if (isNaN(Number(value))) {
+            // Handle numbers that might have commas
+            const cleanedNumber = typeof value === 'string' ? 
+              value.replace(/,/g, '').trim() : value;
+            if (isNaN(Number(cleanedNumber))) {
               errors.push({
                 type: 'TYPE_ERROR',
                 message: `Row ${index + 1}: '${csvHeaderName}' must be a number, got '${value}'`,
                 severity: 'error',
-                row: index + 1
+                row: index + 1,
+                field: csvHeaderName,
+                value: value
+              });
+            }
+            break;
+          
+          case 'currency':
+            // Use enhanced currency validation
+            if (!isValidCurrency(value)) {
+              errors.push({
+                type: 'TYPE_ERROR',
+                message: `Row ${index + 1}: '${csvHeaderName}' must be a valid currency amount, got '${value}'`,
+                severity: 'error',
+                row: index + 1,
+                field: csvHeaderName,
+                value: value
               });
             }
             break;
           
           case 'date':
           case 'datetime':
-            if (isNaN(Date.parse(value))) {
+            // Use enhanced UK date validation
+            if (!isValidUKDate(value) && isNaN(Date.parse(value))) {
               errors.push({
                 type: 'TYPE_ERROR',
-                message: `Row ${index + 1}: '${csvHeaderName}' must be a valid date, got '${value}'`,
+                message: `Row ${index + 1}: '${csvHeaderName}' must be a valid date (DD/MM/YYYY format supported), got '${value}'`,
                 severity: 'error',
-                row: index + 1
+                row: index + 1,
+                field: csvHeaderName,
+                value: value
               });
             }
             break;
 
           case 'percentage':
-            const numValue = Number(value);
-            if (isNaN(numValue) || numValue < 0 || numValue > 100) {
+            const percentValue = typeof value === 'string' ? 
+              parseFloat(value.replace('%', '').trim()) : parseFloat(value);
+            if (isNaN(percentValue) || percentValue < 0 || percentValue > 100) {
               errors.push({
                 type: 'TYPE_ERROR',
                 message: `Row ${index + 1}: '${csvHeaderName}' must be a percentage (0-100), got '${value}'`,
                 severity: 'error',
-                row: index + 1
+                row: index + 1,
+                field: csvHeaderName,
+                value: value
               });
             }
             break;
 
-		default:
-    
-			break;
-	}
+          default:
+            // For string fields, just check they're not empty if required
+            if (fieldConfig.required && (!value || value.toString().trim() === '')) {
+              errors.push({
+                type: 'TYPE_ERROR',
+                message: `Row ${index + 1}: '${csvHeaderName}' is required but empty`,
+                severity: 'error',
+                row: index + 1,
+                field: csvHeaderName,
+                value: value
+              });
+            }
+            break;
+        }
       });
     });
 
     return { errors, warnings };
-  }, []);
+  }, [isValidUKDate, isValidCurrency]);
 
   // Basic business rules validation
   const validateBusinessRules = useCallback((csvData, reportConfig) => {
@@ -225,6 +313,20 @@ const FileValidator = ({
     
     return { errors, warnings };
   }, []);
+
+  // Generate validation summary
+  const generateValidationSummary = useCallback((data, errors, warnings) => {
+    return {
+      totalRows: data.length,
+      validRows: data.length - errors.filter(e => e.type === 'ROW_ERROR').length,
+      errorCount: errors.length,
+      warningCount: warnings.length,
+      fileSize: file ? `${(file.size / 1024).toFixed(1)} KB` : 'Unknown',
+      fileName: file ? file.name : 'Unknown',
+      sampleData: data.slice(0, 3), // First 3 rows for preview
+      detectedColumns: data.length > 0 ? Object.keys(data[0]) : []
+    };
+  }, [file]);
 
   // Main validation function
   const validateFile = useCallback(async () => {
@@ -259,6 +361,7 @@ const FileValidator = ({
       const csvData = await parseCSV(fileContent);
       
       console.log('CSV data parsed:', csvData.length, 'rows');
+      console.log('Sample row:', csvData[0]);
 
       // Run validation steps
       const structureValidation = validateCSVStructure(csvData, reportConfig);
@@ -285,157 +388,167 @@ const FileValidator = ({
 
       console.log('Validation complete. Errors:', allErrors.length, 'Warnings:', allWarnings.length);
 
+      const validationResult = {
+        isValid,
+        errors: allErrors,
+        warnings: allWarnings,
+        summary,
+        details: {
+          csvData: csvData.slice(0, 5), // First 5 rows for debugging
+          reportConfig
+        }
+      };
+
       setValidationState({
         isValidating: false,
         isValid,
         errors: allErrors,
         warnings: allWarnings,
         summary,
-        details: {
-          structure: structureValidation,
-          dataTypes: dataTypeValidation,
-          businessRules: businessRuleValidation,
-          rowCount: csvData.length,
-          columnCount: Object.keys(csvData[0] || {}).length
-        }
+        details: validationResult.details
       });
+
+      // Call the onValidation callback
+      if (onValidation) {
+        onValidation(validationResult);
+      }
 
     } catch (error) {
       console.error('Validation error:', error);
-      setValidationState(prev => ({
-        ...prev,
-        isValidating: false,
+      
+      const errorResult = {
         isValid: false,
         errors: [{
-          type: 'CRITICAL',
-          message: `File validation failed: ${error.message}`,
+          type: 'VALIDATION_ERROR',
+          message: error.message,
           severity: 'error'
-        }]
-      }));
-    }
-  }, [file, reportType, readFileContent, parseCSV, generateValidationSummary, validateCSVStructure, validateDataTypes, validateBusinessRules]);
+        }],
+        warnings: [],
+        summary: null,
+        details: null
+      };
 
-  // Auto-validate when file or reportType changes
+      setValidationState({
+        isValidating: false,
+        isValid: false,
+        errors: errorResult.errors,
+        warnings: [],
+        summary: null,
+        details: null
+      });
+
+      if (onValidation) {
+        onValidation(errorResult);
+      }
+    }
+  }, [file, reportType, readFileContent, parseCSV, validateCSVStructure, validateDataTypes, validateBusinessRules, generateValidationSummary, onValidation]);
+
+  // Auto-validate when file or report type changes
   useEffect(() => {
     if (autoValidate && file && reportType) {
       validateFile();
     }
-  }, [autoValidate, file, reportType, validateFile]);
+  }, [file, reportType, autoValidate, validateFile]);
 
-  // Update parent component with validation results
-  useEffect(() => {
-    if (onValidation) {
-      onValidation(validationState);
+  // Manual validation trigger
+  const triggerValidation = () => {
+    validateFile();
+  };
+
+  // Render validation results
+  const renderValidationResults = () => {
+    if (validationState.isValidating) {
+      return (
+        <div className="validation-status validating">
+          <div className="validation-spinner"></div>
+          <span>Validating file...</span>
+        </div>
+      );
     }
-  }, [validationState, onValidation]);
 
-  const getValidationIcon = () => {
-    if (validationState.isValidating) return '⏳';
-    if (validationState.isValid === true) return '✅';
-    if (validationState.isValid === false) return '❌';
-    return '📄';
-  };
+    if (validationState.isValid === null) {
+      return null;
+    }
 
-  const getValidationStatus = () => {
-    if (validationState.isValidating) return 'Validating...';
-    if (validationState.isValid === true) return 'Valid';
-    if (validationState.isValid === false) return 'Invalid';
-    return 'Ready to validate';
-  };
+    return (
+      <div className={`validation-results ${validationState.isValid ? 'valid' : 'invalid'}`}>
+        <div className="validation-summary">
+          <div className={`validation-status ${validationState.isValid ? 'valid' : 'invalid'}`}>
+            <span className="status-icon">
+              {validationState.isValid ? '✅' : '❌'}
+            </span>
+            <span className="status-text">
+              {validationState.isValid ? 'File is valid' : 'File has errors'}
+            </span>
+          </div>
 
-  const getStatusColor = () => {
-    if (validationState.isValidating) return '#3182ce';
-    if (validationState.isValid === true) return '#38a169';
-    if (validationState.isValid === false) return '#e53e3e';
-    return '#718096';
+          {validationState.summary && (
+            <div className="file-summary">
+              <span>📄 {validationState.summary.fileName}</span>
+              <span>📊 {validationState.summary.totalRows} rows</span>
+              <span>💾 {validationState.summary.fileSize}</span>
+              {validationState.summary.errorCount > 0 && (
+                <span className="error-count">❌ {validationState.summary.errorCount} errors</span>
+              )}
+              {validationState.summary.warningCount > 0 && (
+                <span className="warning-count">⚠️ {validationState.summary.warningCount} warnings</span>
+              )}
+            </div>
+          )}
+        </div>
+
+        {validationState.errors.length > 0 && (
+          <div className="validation-errors">
+            <h4>Errors ({validationState.errors.length})</h4>
+            <div className="error-list">
+              {validationState.errors.slice(0, 10).map((error, index) => (
+                <div key={index} className="error-item">
+                  <span className="error-type">{error.type}</span>
+                  <span className="error-message">{error.message}</span>
+                </div>
+              ))}
+              {validationState.errors.length > 10 && (
+                <div className="error-item">
+                  <span className="error-more">
+                    ... and {validationState.errors.length - 10} more errors
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {validationState.warnings.length > 0 && (
+          <div className="validation-warnings">
+            <h4>Warnings ({validationState.warnings.length})</h4>
+            <div className="warning-list">
+              {validationState.warnings.slice(0, 5).map((warning, index) => (
+                <div key={index} className="warning-item">
+                  <span className="warning-message">{warning.message}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
     <div className={`file-validator ${className}`}>
-      {/* Validation Header */}
-      <div className="validation-header">
-        <div className="validation-status">
-          <span className="status-icon">{getValidationIcon()}</span>
-          <span className="status-text" style={{ color: getStatusColor() }}>
-            {getValidationStatus()}
-          </span>
-        </div>
-        
-        {!autoValidate && file && reportType && (
+      {!autoValidate && (
+        <div className="validator-controls">
           <button 
-            onClick={validateFile}
-            disabled={validationState.isValidating}
-            className="validate-btn"
+            onClick={triggerValidation}
+            disabled={!file || !reportType || validationState.isValidating}
+            className="validate-button"
           >
             {validationState.isValidating ? 'Validating...' : 'Validate File'}
           </button>
-        )}
-      </div>
-
-      {/* File Summary */}
-      {validationState.summary && (
-        <div className="file-summary">
-          <div className="summary-grid">
-            <div className="summary-item">
-              <span className="summary-label">File:</span>
-              <span className="summary-value">{validationState.summary.fileName}</span>
-            </div>
-            <div className="summary-item">
-              <span className="summary-label">Size:</span>
-              <span className="summary-value">{validationState.summary.fileSize}</span>
-            </div>
-            <div className="summary-item">
-              <span className="summary-label">Rows:</span>
-              <span className="summary-value">{validationState.summary.totalRows}</span>
-            </div>
-            <div className="summary-item">
-              <span className="summary-label">Valid:</span>
-              <span className="summary-value">{validationState.summary.validRows}</span>
-            </div>
-          </div>
         </div>
       )}
-
-      {/* Validation Results */}
-      {(validationState.errors.length > 0 || validationState.warnings.length > 0) && (
-        <div className="validation-results">
-          {/* Errors */}
-          {validationState.errors.length > 0 && (
-            <div className="error-section">
-              <h4 className="section-title error-title">
-                Errors ({validationState.errors.length})
-              </h4>
-              <div className="message-list">
-                {validationState.errors.map((error, index) => (
-                  <div key={index} className="message-item error-item">
-                    <span className="message-type">{error.type}</span>
-                    <span className="message-text">{error.message}</span>
-                    {error.row && (
-                      <span className="message-location">Row {error.row}</span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Warnings */}
-          {validationState.warnings.length > 0 && (
-            <div className="warning-section">
-              <h4 className="section-title warning-title">
-                Warnings ({validationState.warnings.length})
-              </h4>
-              <div className="message-list">
-                {validationState.warnings.map((warning, index) => (
-                  <div key={index} className="message-item warning-item">
-                    <span className="message-text">{warning.message || warning}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
+      
+      {renderValidationResults()}
     </div>
   );
 };

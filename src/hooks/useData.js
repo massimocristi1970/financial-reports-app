@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { loadData, saveData, clearData } from '../utils/indexedDBHelper';
-import { processCSV, validateData } from '../utils/csvProcessor';
+import { processCSVFile, validateRowData } from '../utils/csvProcessor';
 import { REPORT_TYPES, DATA_SOURCES } from '../utils/constants';
 
 const useData = (reportType = null) => {
@@ -60,7 +60,7 @@ const useData = (reportType = null) => {
       }
 
       // Validate and process data
-      const validatedData = validateData(result, type);
+      const validatedData = result; // Data from IndexedDB is already validated
       
       // Update cache
       setCache(prev => new Map(prev).set(type, {
@@ -89,8 +89,8 @@ const useData = (reportType = null) => {
     setError(null);
 
     try {
-      const csvData = await processCSV(file);
-      const validatedData = validateData(csvData, type);
+      const result = await processCSVFile(file, type);
+	  const validatedData = result.success ? result.data : [];
 
       // Save to IndexedDB
       await saveData(type, validatedData);
@@ -139,7 +139,7 @@ const useData = (reportType = null) => {
         }
       }
 
-      const validatedData = validateData(updatedData, type);
+      const validatedData = updatedData; // Keep data as-is
       await saveData(type, validatedData);
 
       // Update cache
