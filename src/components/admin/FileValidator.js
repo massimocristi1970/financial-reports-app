@@ -117,12 +117,17 @@ const FileValidator = ({
 
   // Helper function to parse currency value to number
   const parseCurrency = useCallback((value) => {
-    if (!value || typeof value !== 'string') return 0;
+    if (!value) return 0;
     
-    const cleaned = value.trim()
-      .replace(/[£$€¥]/g, '')
-      .replace(/,/g, '')
-      .replace(/\s/g, '');
+    // Convert to string if it's not already
+    const strValue = String(value).trim();
+    
+    // Remove currency symbols, commas, and whitespace
+    // FIXED: Handle corrupted £ symbols (� character)
+    const cleaned = strValue
+      .replace(/[£$€¥�]/g, '') // Remove currency symbols INCLUDING corrupted £ (�)
+      .replace(/,/g, '') // Remove commas
+      .replace(/\s/g, ''); // Remove whitespace
     
     return parseFloat(cleaned) || 0;
   }, []);
