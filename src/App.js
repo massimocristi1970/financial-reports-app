@@ -83,8 +83,15 @@ function App() {
             <Router basename={process.env.NODE_ENV === 'production' ? '/dashboard' : ''}>
               <Layout>
                 <Routes>
-                  {/* ... routes ... */}
-                </Routes>
+					<Route path="/" element={<RouteLoader><OverviewDashboard /></RouteLoader>} />
+					<Route path="/lending" element={<RouteLoader><LendingDashboard /></RouteLoader>} />
+					<Route path="/arrears" element={<RouteLoader><ArrearsDashboard /></RouteLoader>} />
+					<Route path="/liquidations" element={<RouteLoader><LiquidationsDashboard /></RouteLoader>} />
+					<Route path="/call-center" element={<RouteLoader><CallCenterDashboard /></RouteLoader>} />
+					<Route path="/complaints" element={<RouteLoader><ComplaintsDashboard /></RouteLoader>} />
+					<Route path="/admin" element={<ProtectedRoute requiresAdmin={true}><RouteLoader><AdminPanel /></RouteLoader></ProtectedRoute>} />
+					<Route path="*" element={<Navigate to="/" replace />} />
+				</Routes>
               </Layout>
             </Router>
           </FilterProvider>
