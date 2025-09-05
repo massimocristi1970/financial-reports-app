@@ -1,5 +1,5 @@
-// src/App.js - FIXED VERSION
-import React, { Suspense, lazy } from 'react';
+// src/App.js - WITH SYSTEM THEME DETECTION
+import React, { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { DataProvider } from './contexts/DataContext';
@@ -8,7 +8,7 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import Layout from './components/common/Layout';
 import LoadingSpinner from './components/common/LoadingSpinner';
 import './App.css';
-import './styles/globals.css'; // Import theme CSS
+import './styles/globals.css';
 
 // Lazy load dashboard components for better performance
 const OverviewDashboard = lazy(() => import('./components/dashboards/OverviewDashboard'));
@@ -30,6 +30,44 @@ const RouteLoader = ({ children }) => (
     {children}
   </Suspense>
 );
+
+// Simple system theme detection component
+const SystemThemeDetector = () => {
+  useEffect(() => {
+    // Detect system theme on app start
+    const detectSystemTheme = () => {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const theme = prefersDark ? 'dark' : 'light';
+      
+      // Apply theme class to body
+      document.body.className = `${theme}-theme`;
+      document.body.setAttribute('data-theme', theme);
+      
+      console.log(`System theme detected: ${theme}`);
+    };
+
+    // Detect on mount
+    detectSystemTheme();
+
+    // Listen for system theme changes
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleThemeChange = (e) => {
+      const theme = e.matches ? 'dark' : 'light';
+      document.body.className = `${theme}-theme`;
+      document.body.setAttribute('data-theme', theme);
+      console.log(`System theme changed to: ${theme}`);
+    };
+
+    mediaQuery.addEventListener('change', handleThemeChange);
+
+    // Cleanup
+    return () => {
+      mediaQuery.removeEventListener('change', handleThemeChange);
+    };
+  }, []);
+
+  return null; // This component doesn't render anything
+};
 
 // Protected route wrapper for admin functionality
 const ProtectedRoute = ({ children, requiresAdmin = false }) => {
@@ -75,6 +113,7 @@ function App() {
   return (
     <ErrorBoundary fallback={AppErrorFallback}>
       <ThemeProvider>
+        <SystemThemeDetector />
         <DataProvider>
           <FilterProvider>
             <Router basename={process.env.NODE_ENV === 'production' ? '/financial-reports' : '/'}>
