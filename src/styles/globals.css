@@ -42,6 +42,43 @@
   --color-gray-900: #0f172a;
   }
   
+  * ADD THIS SECTION HERE - Light theme defaults */
+:root,
+[data-theme="light"] {
+  --bg-primary: var(--color-white);
+  --bg-secondary: var(--color-gray-50);
+  --bg-tertiary: var(--color-gray-100);
+  --bg-card: var(--color-white);
+  --bg-sidebar: var(--color-white);
+  --bg-header: var(--color-white);
+
+  --text-primary: var(--color-gray-900);
+  --text-secondary: var(--color-gray-600);
+  --text-tertiary: var(--color-gray-400);
+  --text-inverse: var(--color-white);
+
+  --border-primary: var(--color-gray-200);
+  --border-secondary: var(--color-gray-300);
+}
+
+/* Dark theme overrides using data-theme attribute */
+[data-theme="dark"] {
+  --bg-primary: var(--color-gray-900);
+  --bg-secondary: var(--color-gray-800);
+  --bg-tertiary: var(--color-gray-700);
+  --bg-card: var(--color-gray-800);
+  --bg-sidebar: var(--color-gray-900);
+  --bg-header: var(--color-gray-800);
+
+  --text-primary: var(--color-gray-100);
+  --text-secondary: var(--color-gray-300);
+  --text-tertiary: var(--color-gray-400);
+  --text-inverse: var(--color-gray-900);
+
+  --border-primary: var(--color-gray-700);
+  --border-secondary: var(--color-gray-600);
+}
+  
 @media (prefers-color-scheme: dark) {
   :root {
     /* Background Colors for Dark Mode */
@@ -191,10 +228,11 @@ body {
   font-weight: var(--font-weight-normal);
   line-height: var(--line-height-normal);
   color: var(--text-primary);
-  background-color: var(--bg-secondary);
+  background-color: var(--bg-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  transition: color 0.3s ease, background-color 0.3s ease;
 }
 
 /* ============================================================================
