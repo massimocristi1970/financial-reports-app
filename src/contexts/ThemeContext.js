@@ -138,7 +138,7 @@ const initialState = {
     animations: true,
     highContrast: false,
     reducedMotion: false,
-    autoTheme: false // Auto switch based on system preference
+    autoTheme: true // Auto switch based on system preference
   },
   breakpoints: {
     sm: 640,

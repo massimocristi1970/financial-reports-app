@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react'; // ADD useEffect HERE
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { DataProvider } from './contexts/DataContext';
@@ -31,9 +31,8 @@ const RouteLoader = ({ children }) => (
 
 // Protected route wrapper for admin functionality
 const ProtectedRoute = ({ children, requiresAdmin = false }) => {
-  // In a real app, you'd check authentication here
-  const isAuthenticated = true; // Replace with actual auth check
-  const isAdmin = true; // Replace with actual admin check
+  const isAuthenticated = true;
+  const isAdmin = true;
   
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
@@ -69,6 +68,20 @@ const AppErrorFallback = ({ error, resetErrorBoundary }) => (
 );
 
 function App() {
+  // ADD THE useEffect HERE, INSIDE THE App FUNCTION:
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    
+    const handleThemeChange = (e) => {
+      document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+    };
+    
+    handleThemeChange(mediaQuery);
+    mediaQuery.addEventListener('change', handleThemeChange);
+    
+    return () => mediaQuery.removeEventListener('change', handleThemeChange);
+  }, []);
+
   return (
     <ErrorBoundary fallback={AppErrorFallback}>
       <ThemeProvider>
@@ -77,44 +90,7 @@ function App() {
             <Router basename={process.env.NODE_ENV === 'production' ? '/dashboard' : ''}>
               <Layout>
                 <Routes>
-                  <Route path="/" element={
-                    <RouteLoader>
-                      <OverviewDashboard />
-                    </RouteLoader>
-                  } />
-                  <Route path="/lending" element={
-                    <RouteLoader>
-                      <LendingDashboard />
-                    </RouteLoader>
-                  } />
-                  <Route path="/arrears" element={
-                    <RouteLoader>
-                      <ArrearsDashboard />
-                    </RouteLoader>
-                  } />
-                  <Route path="/liquidations" element={
-                    <RouteLoader>
-                      <LiquidationsDashboard />
-                    </RouteLoader>
-                  } />
-                  <Route path="/call-center" element={
-                    <RouteLoader>
-                      <CallCenterDashboard />
-                    </RouteLoader>
-                  } />
-                  <Route path="/complaints" element={
-                    <RouteLoader>
-                      <LiquidationsDashboard />
-                    </RouteLoader>
-                  } />
-                  <Route path="/admin" element={
-                    <ProtectedRoute requiresAdmin={true}>
-                      <RouteLoader>
-                        <AdminPanel />
-                      </RouteLoader>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="*" element={<Navigate to="/" replace />} />
+                  {/* ... all your routes stay the same ... */}
                 </Routes>
               </Layout>
             </Router>
