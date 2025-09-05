@@ -1,1 +1,272 @@
- 
+[
+  {
+    "CustomerID": "CUST100000",
+    "count": 1,
+    "received_date": "2024-01-01",
+    "resolved_date": "2024-01-15",
+    "days_to_resolve": 14,
+    "category": "Product",
+    "decision": "Pending"
+  },
+  {
+    "CustomerID": "CUST100001",
+    "count": 1,
+    "received_date": "2024-01-03",
+    "resolved_date": "2024-01-07",
+    "days_to_resolve": 4,
+    "category": "Technical",
+    "decision": "Resolved"
+  },
+  {
+    "CustomerID": "CUST100002",
+    "count": 1,
+    "received_date": "2024-01-05",
+    "resolved_date": "2024-01-10",
+    "days_to_resolve": 5,
+    "category": "Billing",
+    "decision": "Resolved"
+  },
+  {
+    "CustomerID": "CUST100003",
+    "count": 1,
+    "received_date": "2024-01-07",
+    "resolved_date": "2024-01-11",
+    "days_to_resolve": 4,
+    "category": "Product",
+    "decision": "Resolved"
+  },
+  {
+    "CustomerID": "CUST100004",
+    "count": 1,
+    "received_date": "2024-01-09",
+    "resolved_date": "2024-01-12",
+    "days_to_resolve": 3,
+    "category": "Billing",
+    "decision": "Upheld"
+  },
+  {
+    "CustomerID": "CUST100005",
+    "count": 1,
+    "received_date": "2024-01-11",
+    "resolved_date": "2024-01-16",
+    "days_to_resolve": 5,
+    "category": "Technical",
+    "decision": "Resolved"
+  },
+  {
+    "CustomerID": "CUST100006",
+    "count": 1,
+    "received_date": "2024-01-13",
+    "resolved_date": "2024-01-19",
+    "days_to_resolve": 6,
+    "category": "Staff Behavior",
+    "decision": "Rejected"
+  },
+  {
+    "CustomerID": "CUST100007",
+    "count": 1,
+    "received_date": "2024-01-15",
+    "resolved_date": "2024-01-22",
+    "days_to_resolve": 7,
+    "category": "Service Quality",
+    "decision": "Pending"
+  },
+  {
+    "CustomerID": "CUST100008",
+    "count": 1,
+    "received_date": "2024-01-17",
+    "resolved_date": "2024-01-24",
+    "days_to_resolve": 7,
+    "category": "Service Quality",
+    "decision": "Resolved"
+  },
+  {
+    "CustomerID": "CUST100009",
+    "count": 1,
+    "received_date": "2024-01-19",
+    "resolved_date": "2024-01-24",
+    "days_to_resolve": 5,
+    "category": "Product",
+    "decision": "Resolved"
+  },
+  {
+    "CustomerID": "CUST100010",
+    "count": 1,
+    "received_date": "2024-01-21",
+    "resolved_date": "2024-01-22",
+    "days_to_resolve": 1,
+    "category": "Technical",
+    "decision": "Rejected"
+  },
+  {
+    "CustomerID": "CUST100011",
+    "count": 1,
+    "received_date": "2024-01-23",
+    "resolved_date": "2024-01-27",
+    "days_to_resolve": 4,
+    "category": "Billing",
+    "decision": "Pending"
+  },
+  {
+    "CustomerID": "CUST100012",
+    "count": 1,
+    "received_date": "2024-01-25",
+    "resolved_date": "2024-02-07",
+    "days_to_resolve": 13,
+    "category": "Service Quality",
+    "decision": "Pending"
+  },
+  {
+    "CustomerID": "CUST100013",
+    "count": 1,
+    "received_date": "2024-01-27",
+    "resolved_date": "2024-01-28",
+    "days_to_resolve": 1,
+    "category": "Product",
+    "decision": "Pending"
+  },
+  {
+    "CustomerID": "CUST100014",
+    "count": 1,
+    "received_date": "2024-01-29",
+    "resolved_date": "2024-02-05",
+    "days_to_resolve": 7,
+    "category": "Service Quality",
+    "decision": "Resolved"
+  },
+  {
+    "CustomerID": "CUST100015",
+    "count": 1,
+    "received_date": "2024-01-31",
+    "resolved_date": "2024-02-13",
+    "days_to_resolve": 13,
+    "category": "Technical",
+    "decision": "Upheld"
+  },
+  {
+    "CustomerID": "CUST100016",
+    "count": 1,
+    "received_date": "2024-02-02",
+    "resolved_date": "2024-02-08",
+    "days_to_resolve": 6,
+    "category": "Technical",
+    "decision": "Rejected"
+  },
+  {
+    "CustomerID": "CUST100017",
+    "count": 1,
+    "received_date": "2024-02-04",
+    "resolved_date": "2024-02-13",
+    "days_to_resolve": 9,
+    "category": "Staff Behavior",
+    "decision": "Rejected"
+  },
+  {
+    "CustomerID": "CUST100018",
+    "count": 1,
+    "received_date": "2024-02-06",
+    "resolved_date": "2024-02-20",
+    "days_to_resolve": 14,
+    "category": "Billing",
+    "decision": "Upheld"
+  },
+  {
+    "CustomerID": "CUST100019",
+    "count": 1,
+    "received_date": "2024-02-08",
+    "resolved_date": "2024-02-22",
+    "days_to_resolve": 14,
+    "category": "Product",
+    "decision": "Pending"
+  },
+  {
+    "CustomerID": "CUST100020",
+    "count": 1,
+    "received_date": "2024-02-10",
+    "resolved_date": "2024-02-23",
+    "days_to_resolve": 13,
+    "category": "Technical",
+    "decision": "Rejected"
+  },
+  {
+    "CustomerID": "CUST100021",
+    "count": 1,
+    "received_date": "2024-02-12",
+    "resolved_date": "2024-02-16",
+    "days_to_resolve": 4,
+    "category": "Technical",
+    "decision": "Resolved"
+  },
+  {
+    "CustomerID": "CUST100022",
+    "count": 1,
+    "received_date": "2024-02-14",
+    "resolved_date": "2024-02-28",
+    "days_to_resolve": 14,
+    "category": "Technical",
+    "decision": "Rejected"
+  },
+  {
+    "CustomerID": "CUST100023",
+    "count": 1,
+    "received_date": "2024-02-16",
+    "resolved_date": "2024-02-28",
+    "days_to_resolve": 12,
+    "category": "Service Quality",
+    "decision": "Upheld"
+  },
+  {
+    "CustomerID": "CUST100024",
+    "count": 1,
+    "received_date": "2024-02-18",
+    "resolved_date": "2024-02-21",
+    "days_to_resolve": 3,
+    "category": "Service Quality",
+    "decision": "Resolved"
+  },
+  {
+    "CustomerID": "CUST100025",
+    "count": 1,
+    "received_date": "2024-02-20",
+    "resolved_date": "2024-02-29",
+    "days_to_resolve": 9,
+    "category": "Staff Behavior",
+    "decision": "Rejected"
+  },
+  {
+    "CustomerID": "CUST100026",
+    "count": 1,
+    "received_date": "2024-02-22",
+    "resolved_date": "2024-03-06",
+    "days_to_resolve": 13,
+    "category": "Service Quality",
+    "decision": "Resolved"
+  },
+  {
+    "CustomerID": "CUST100027",
+    "count": 1,
+    "received_date": "2024-02-24",
+    "resolved_date": "2024-02-29",
+    "days_to_resolve": 5,
+    "category": "Technical",
+    "decision": "Pending"
+  },
+  {
+    "CustomerID": "CUST100028",
+    "count": 1,
+    "received_date": "2024-02-26",
+    "resolved_date": "2024-03-06",
+    "days_to_resolve": 9,
+    "category": "Staff Behavior",
+    "decision": "Resolved"
+  },
+  {
+    "CustomerID": "CUST100029",
+    "count": 1,
+    "received_date": "2024-02-28",
+    "resolved_date": "2024-03-05",
+    "days_to_resolve": 6,
+    "category": "Product",
+    "decision": "Resolved"
+  }
+]

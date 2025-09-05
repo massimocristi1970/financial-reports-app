@@ -1,1 +1,146 @@
- 
+[
+  {
+    "funded_year": 2024,
+    "funded_month": 1,
+    "funded": 353415,
+    "collected": 240488,
+    "actual_liquidation_rate": 68,
+    "future_scheduled": 35341,
+    "dmp_iva_collected": 24048,
+    "all_together": 258158,
+    "forecast_liquidation_rate": 73,
+    "total_due_not_scheduled": 22585
+  },
+  {
+    "funded_year": 2024,
+    "funded_month": 2,
+    "funded": 498678,
+    "collected": 311296,
+    "actual_liquidation_rate": 62,
+    "future_scheduled": 49867,
+    "dmp_iva_collected": 31129,
+    "all_together": 336229,
+    "forecast_liquidation_rate": 67,
+    "total_due_not_scheduled": 37476
+  },
+  {
+    "funded_year": 2024,
+    "funded_month": 3,
+    "funded": 344073,
+    "collected": 293481,
+    "actual_liquidation_rate": 85,
+    "future_scheduled": 34407,
+    "dmp_iva_collected": 29348,
+    "all_together": 310684,
+    "forecast_liquidation_rate": 90,
+    "total_due_not_scheduled": 10118
+  },
+  {
+    "funded_year": 2024,
+    "funded_month": 4,
+    "funded": 429018,
+    "collected": 268848,
+    "actual_liquidation_rate": 63,
+    "future_scheduled": 42901,
+    "dmp_iva_collected": 26884,
+    "all_together": 290298,
+    "forecast_liquidation_rate": 68,
+    "total_due_not_scheduled": 32034
+  },
+  {
+    "funded_year": 2024,
+    "funded_month": 5,
+    "funded": 272467,
+    "collected": 229571,
+    "actual_liquidation_rate": 84,
+    "future_scheduled": 27246,
+    "dmp_iva_collected": 22957,
+    "all_together": 243194,
+    "forecast_liquidation_rate": 89,
+    "total_due_not_scheduled": 8579
+  },
+  {
+    "funded_year": 2024,
+    "funded_month": 6,
+    "funded": 465810,
+    "collected": 295696,
+    "actual_liquidation_rate": 63,
+    "future_scheduled": 46581,
+    "dmp_iva_collected": 29569,
+    "all_together": 318986,
+    "forecast_liquidation_rate": 68,
+    "total_due_not_scheduled": 34022
+  },
+  {
+    "funded_year": 2024,
+    "funded_month": 7,
+    "funded": 446878,
+    "collected": 314848,
+    "actual_liquidation_rate": 70,
+    "future_scheduled": 44687,
+    "dmp_iva_collected": 31484,
+    "all_together": 337191,
+    "forecast_liquidation_rate": 75,
+    "total_due_not_scheduled": 26406
+  },
+  {
+    "funded_year": 2024,
+    "funded_month": 8,
+    "funded": 364031,
+    "collected": 308525,
+    "actual_liquidation_rate": 85,
+    "future_scheduled": 36403,
+    "dmp_iva_collected": 30852,
+    "all_together": 326726,
+    "forecast_liquidation_rate": 90,
+    "total_due_not_scheduled": 11101
+  },
+  {
+    "funded_year": 2024,
+    "funded_month": 9,
+    "funded": 235421,
+    "collected": 163566,
+    "actual_liquidation_rate": 69,
+    "future_scheduled": 23542,
+    "dmp_iva_collected": 16356,
+    "all_together": 175337,
+    "forecast_liquidation_rate": 74,
+    "total_due_not_scheduled": 14371
+  },
+  {
+    "funded_year": 2024,
+    "funded_month": 10,
+    "funded": 610365,
+    "collected": 470321,
+    "actual_liquidation_rate": 77,
+    "future_scheduled": 61036,
+    "dmp_iva_collected": 47032,
+    "all_together": 500839,
+    "forecast_liquidation_rate": 82,
+    "total_due_not_scheduled": 28008
+  },
+  {
+    "funded_year": 2024,
+    "funded_month": 11,
+    "funded": 428943,
+    "collected": 357530,
+    "actual_liquidation_rate": 83,
+    "future_scheduled": 42894,
+    "dmp_iva_collected": 35753,
+    "all_together": 378977,
+    "forecast_liquidation_rate": 88,
+    "total_due_not_scheduled": 14282
+  },
+  {
+    "funded_year": 2024,
+    "funded_month": 12,
+    "funded": 593871,
+    "collected": 496972,
+    "actual_liquidation_rate": 84,
+    "future_scheduled": 59387,
+    "dmp_iva_collected": 49697,
+    "all_together": 526665,
+    "forecast_liquidation_rate": 89,
+    "total_due_not_scheduled": 19379
+  }
+]

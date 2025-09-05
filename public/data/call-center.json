@@ -1,1 +1,902 @@
- 
+[
+  {
+    "call_id": "CALL000001",
+    "date_time": "2024-01-01 14:24:46",
+    "agent_name": "John Smith",
+    "answered_date_time": "2024-01-01 14:25:10",
+    "from_number": "+44410200326",
+    "disposition": "Transferred",
+    "talk_time": 161
+  },
+  {
+    "call_id": "CALL000002",
+    "date_time": "2024-01-01 16:21:20",
+    "agent_name": "John Smith",
+    "answered_date_time": "2024-01-01 16:21:42",
+    "from_number": "+44272794689",
+    "disposition": "Voicemail",
+    "talk_time": 287
+  },
+  {
+    "call_id": "CALL000003",
+    "date_time": "2024-01-01 11:14:49",
+    "agent_name": "Tom Brown",
+    "answered_date_time": "2024-01-01 11:15:02",
+    "from_number": "+44251620740",
+    "disposition": "Callback",
+    "talk_time": 330
+  },
+  {
+    "call_id": "CALL000004",
+    "date_time": "2024-01-01 09:31:23",
+    "agent_name": "Mike Wilson",
+    "answered_date_time": "2024-01-01 09:31:24",
+    "from_number": "+4497488092",
+    "disposition": "Voicemail",
+    "talk_time": 239
+  },
+  {
+    "call_id": "CALL000005",
+    "date_time": "2024-01-01 12:55:51",
+    "agent_name": "John Smith",
+    "answered_date_time": "2024-01-01 12:55:55",
+    "from_number": "+44471868568",
+    "disposition": "Resolved",
+    "talk_time": 427
+  },
+  {
+    "call_id": "CALL000006",
+    "date_time": "2024-01-01 10:47:18",
+    "agent_name": "Emma Davis",
+    "answered_date_time": "2024-01-01 10:47:20",
+    "from_number": "+44736995583",
+    "disposition": "Resolved",
+    "talk_time": 462
+  },
+  {
+    "call_id": "CALL000007",
+    "date_time": "2024-01-01 14:45:33",
+    "agent_name": "Sarah Johnson",
+    "answered_date_time": "2024-01-01 14:45:58",
+    "from_number": "+44135910584",
+    "disposition": "Resolved",
+    "talk_time": 176
+  },
+  {
+    "call_id": "CALL000008",
+    "date_time": "2024-01-01 11:07:48",
+    "agent_name": "John Smith",
+    "answered_date_time": "2024-01-01 11:08:03",
+    "from_number": "+44553650620",
+    "disposition": "Resolved",
+    "talk_time": 447
+  },
+  {
+    "call_id": "CALL000009",
+    "date_time": "2024-01-01 14:47:02",
+    "agent_name": "John Smith",
+    "answered_date_time": "2024-01-01 14:47:27",
+    "from_number": "+44338906367",
+    "disposition": "Resolved",
+    "talk_time": 87
+  },
+  {
+    "call_id": "CALL000010",
+    "date_time": "2024-01-01 13:57:50",
+    "agent_name": "Emma Davis",
+    "answered_date_time": "2024-01-01 13:57:54",
+    "from_number": "+44595126518",
+    "disposition": "Resolved",
+    "talk_time": 112
+  },
+  {
+    "call_id": "CALL000011",
+    "date_time": "2024-01-02 10:42:34",
+    "agent_name": "John Smith",
+    "answered_date_time": "2024-01-02 10:42:57",
+    "from_number": "+44356191353",
+    "disposition": "Callback",
+    "talk_time": 493
+  },
+  {
+    "call_id": "CALL000012",
+    "date_time": "2024-01-02 12:55:40",
+    "agent_name": "Mike Wilson",
+    "answered_date_time": "2024-01-02 12:55:49",
+    "from_number": "+44591291225",
+    "disposition": "Voicemail",
+    "talk_time": 610
+  },
+  {
+    "call_id": "CALL000013",
+    "date_time": "2024-01-02 11:34:34",
+    "agent_name": "Sarah Johnson",
+    "answered_date_time": "2024-01-02 11:34:40",
+    "from_number": "+44455062445",
+    "disposition": "Resolved",
+    "talk_time": 253
+  },
+  {
+    "call_id": "CALL000014",
+    "date_time": "2024-01-02 13:10:58",
+    "agent_name": "John Smith",
+    "answered_date_time": "2024-01-02 13:10:59",
+    "from_number": "+44592013565",
+    "disposition": "Callback",
+    "talk_time": 302
+  },
+  {
+    "call_id": "CALL000015",
+    "date_time": "2024-01-02 16:05:32",
+    "agent_name": "Emma Davis",
+    "answered_date_time": "2024-01-02 16:05:57",
+    "from_number": "+44703325490",
+    "disposition": "Voicemail",
+    "talk_time": 434
+  },
+  {
+    "call_id": "CALL000016",
+    "date_time": "2024-01-02 14:46:51",
+    "agent_name": "John Smith",
+    "answered_date_time": "2024-01-02 14:47:01",
+    "from_number": "+44359715240",
+    "disposition": "Resolved",
+    "talk_time": 193
+  },
+  {
+    "call_id": "CALL000017",
+    "date_time": "2024-01-02 09:29:49",
+    "agent_name": "Emma Davis",
+    "answered_date_time": "2024-01-02 09:29:54",
+    "from_number": "+44854689632",
+    "disposition": "Callback",
+    "talk_time": 364
+  },
+  {
+    "call_id": "CALL000018",
+    "date_time": "2024-01-02 15:59:24",
+    "agent_name": "Tom Brown",
+    "answered_date_time": "2024-01-02 15:59:26",
+    "from_number": "+44619969059",
+    "disposition": "Callback",
+    "talk_time": 463
+  },
+  {
+    "call_id": "CALL000019",
+    "date_time": "2024-01-02 12:10:01",
+    "agent_name": "Tom Brown",
+    "answered_date_time": "2024-01-02 12:10:17",
+    "from_number": "+44601524579",
+    "disposition": "Callback",
+    "talk_time": 150
+  },
+  {
+    "call_id": "CALL000020",
+    "date_time": "2024-01-02 14:50:56",
+    "agent_name": "Tom Brown",
+    "answered_date_time": "2024-01-02 14:51:06",
+    "from_number": "+44267936797",
+    "disposition": "Resolved",
+    "talk_time": 493
+  },
+  {
+    "call_id": "CALL000021",
+    "date_time": "2024-01-03 12:29:48",
+    "agent_name": "Emma Davis",
+    "answered_date_time": "2024-01-03 12:30:13",
+    "from_number": "+44557877646",
+    "disposition": "Callback",
+    "talk_time": 214
+  },
+  {
+    "call_id": "CALL000022",
+    "date_time": "2024-01-03 09:19:22",
+    "agent_name": "John Smith",
+    "answered_date_time": "2024-01-03 09:19:37",
+    "from_number": "+44632180000",
+    "disposition": "Voicemail",
+    "talk_time": 500
+  },
+  {
+    "call_id": "CALL000023",
+    "date_time": "2024-01-03 12:43:20",
+    "agent_name": "John Smith",
+    "answered_date_time": "2024-01-03 12:43:46",
+    "from_number": "+44172415714",
+    "disposition": "Voicemail",
+    "talk_time": 357
+  },
+  {
+    "call_id": "CALL000024",
+    "date_time": "2024-01-03 12:12:25",
+    "agent_name": "John Smith",
+    "answered_date_time": "2024-01-03 12:12:45",
+    "from_number": "+44154786411",
+    "disposition": "Transferred",
+    "talk_time": 330
+  },
+  {
+    "call_id": "CALL000025",
+    "date_time": "2024-01-03 14:27:37",
+    "agent_name": "Emma Davis",
+    "answered_date_time": "2024-01-03 14:28:05",
+    "from_number": "+44646525597",
+    "disposition": "Callback",
+    "talk_time": 213
+  },
+  {
+    "call_id": "CALL000026",
+    "date_time": "2024-01-03 10:06:14",
+    "agent_name": "Mike Wilson",
+    "answered_date_time": "2024-01-03 10:06:14",
+    "from_number": "+44962203668",
+    "disposition": "Callback",
+    "talk_time": 263
+  },
+  {
+    "call_id": "CALL000027",
+    "date_time": "2024-01-03 11:28:27",
+    "agent_name": "Sarah Johnson",
+    "answered_date_time": "2024-01-03 11:28:53",
+    "from_number": "+44368436907",
+    "disposition": "Resolved",
+    "talk_time": 78
+  },
+  {
+    "call_id": "CALL000028",
+    "date_time": "2024-01-03 12:26:09",
+    "agent_name": "Sarah Johnson",
+    "answered_date_time": "2024-01-03 12:26:33",
+    "from_number": "+44579429159",
+    "disposition": "Resolved",
+    "talk_time": 248
+  },
+  {
+    "call_id": "CALL000029",
+    "date_time": "2024-01-03 12:29:27",
+    "agent_name": "Emma Davis",
+    "answered_date_time": "2024-01-03 12:29:42",
+    "from_number": "+44510554875",
+    "disposition": "Resolved",
+    "talk_time": 457
+  },
+  {
+    "call_id": "CALL000030",
+    "date_time": "2024-01-03 11:43:05",
+    "agent_name": "Mike Wilson",
+    "answered_date_time": "2024-01-03 11:43:23",
+    "from_number": "+44256445100",
+    "disposition": "Transferred",
+    "talk_time": 598
+  },
+  {
+    "call_id": "CALL000031",
+    "date_time": "2024-01-04 09:03:21",
+    "agent_name": "Tom Brown",
+    "answered_date_time": "2024-01-04 09:03:49",
+    "from_number": "+44625588382",
+    "disposition": "Resolved",
+    "talk_time": 565
+  },
+  {
+    "call_id": "CALL000032",
+    "date_time": "2024-01-04 15:27:43",
+    "agent_name": "John Smith",
+    "answered_date_time": "2024-01-04 15:27:50",
+    "from_number": "+44555409850",
+    "disposition": "Transferred",
+    "talk_time": 352
+  },
+  {
+    "call_id": "CALL000033",
+    "date_time": "2024-01-04 12:52:50",
+    "agent_name": "John Smith",
+    "answered_date_time": "2024-01-04 12:53:04",
+    "from_number": "+44770466748",
+    "disposition": "Transferred",
+    "talk_time": 61
+  },
+  {
+    "call_id": "CALL000034",
+    "date_time": "2024-01-04 09:31:48",
+    "agent_name": "Mike Wilson",
+    "answered_date_time": "2024-01-04 09:31:53",
+    "from_number": "+44740657456",
+    "disposition": "Transferred",
+    "talk_time": 233
+  },
+  {
+    "call_id": "CALL000035",
+    "date_time": "2024-01-04 11:55:51",
+    "agent_name": "Tom Brown",
+    "answered_date_time": "2024-01-04 11:55:51",
+    "from_number": "+4471771596",
+    "disposition": "Resolved",
+    "talk_time": 73
+  },
+  {
+    "call_id": "CALL000036",
+    "date_time": "2024-01-04 14:39:51",
+    "agent_name": "Emma Davis",
+    "answered_date_time": "2024-01-04 14:39:54",
+    "from_number": "+44132366487",
+    "disposition": "Callback",
+    "talk_time": 356
+  },
+  {
+    "call_id": "CALL000037",
+    "date_time": "2024-01-04 14:16:49",
+    "agent_name": "Tom Brown",
+    "answered_date_time": "2024-01-04 14:16:50",
+    "from_number": "+44293884949",
+    "disposition": "Resolved",
+    "talk_time": 88
+  },
+  {
+    "call_id": "CALL000038",
+    "date_time": "2024-01-04 16:21:34",
+    "agent_name": "Tom Brown",
+    "answered_date_time": "2024-01-04 16:21:53",
+    "from_number": "+44468534233",
+    "disposition": "Voicemail",
+    "talk_time": 89
+  },
+  {
+    "call_id": "CALL000039",
+    "date_time": "2024-01-04 12:43:03",
+    "agent_name": "Tom Brown",
+    "answered_date_time": "2024-01-04 12:43:21",
+    "from_number": "+44154407661",
+    "disposition": "Voicemail",
+    "talk_time": 203
+  },
+  {
+    "call_id": "CALL000040",
+    "date_time": "2024-01-04 11:17:11",
+    "agent_name": "Tom Brown",
+    "answered_date_time": "2024-01-04 11:17:34",
+    "from_number": "+44859327764",
+    "disposition": "Callback",
+    "talk_time": 236
+  },
+  {
+    "call_id": "CALL000041",
+    "date_time": "2024-01-05 16:36:43",
+    "agent_name": "Tom Brown",
+    "answered_date_time": "2024-01-05 16:36:59",
+    "from_number": "+44278975393",
+    "disposition": "Resolved",
+    "talk_time": 268
+  },
+  {
+    "call_id": "CALL000042",
+    "date_time": "2024-01-05 13:35:34",
+    "agent_name": "Tom Brown",
+    "answered_date_time": "2024-01-05 13:35:38",
+    "from_number": "+44550900859",
+    "disposition": "Transferred",
+    "talk_time": 194
+  },
+  {
+    "call_id": "CALL000043",
+    "date_time": "2024-01-05 12:16:57",
+    "agent_name": "John Smith",
+    "answered_date_time": "2024-01-05 12:17:15",
+    "from_number": "+44141598070",
+    "disposition": "Voicemail",
+    "talk_time": 508
+  },
+  {
+    "call_id": "CALL000044",
+    "date_time": "2024-01-05 11:33:31",
+    "agent_name": "Tom Brown",
+    "answered_date_time": "2024-01-05 11:33:40",
+    "from_number": "+44129619064",
+    "disposition": "Transferred",
+    "talk_time": 372
+  },
+  {
+    "call_id": "CALL000045",
+    "date_time": "2024-01-05 12:53:13",
+    "agent_name": "Sarah Johnson",
+    "answered_date_time": "2024-01-05 12:53:29",
+    "from_number": "+44593535224",
+    "disposition": "Transferred",
+    "talk_time": 83
+  },
+  {
+    "call_id": "CALL000046",
+    "date_time": "2024-01-05 15:41:55",
+    "agent_name": "John Smith",
+    "answered_date_time": "2024-01-05 15:42:09",
+    "from_number": "+44123068025",
+    "disposition": "Resolved",
+    "talk_time": 311
+  },
+  {
+    "call_id": "CALL000047",
+    "date_time": "2024-01-05 09:53:04",
+    "agent_name": "Mike Wilson",
+    "answered_date_time": "2024-01-05 09:53:23",
+    "from_number": "+44135769254",
+    "disposition": "Transferred",
+    "talk_time": 204
+  },
+  {
+    "call_id": "CALL000048",
+    "date_time": "2024-01-05 16:15:38",
+    "agent_name": "Emma Davis",
+    "answered_date_time": "2024-01-05 16:15:54",
+    "from_number": "+44846219764",
+    "disposition": "Transferred",
+    "talk_time": 342
+  },
+  {
+    "call_id": "CALL000049",
+    "date_time": "2024-01-05 15:15:32",
+    "agent_name": "John Smith",
+    "answered_date_time": "2024-01-05 15:15:58",
+    "from_number": "+44177993405",
+    "disposition": "Transferred",
+    "talk_time": 487
+  },
+  {
+    "call_id": "CALL000050",
+    "date_time": "2024-01-05 12:56:42",
+    "agent_name": "Sarah Johnson",
+    "answered_date_time": "2024-01-05 12:56:42",
+    "from_number": "+44266426216",
+    "disposition": "Transferred",
+    "talk_time": 313
+  },
+  {
+    "call_id": "CALL000051",
+    "date_time": "2024-01-06 12:02:54",
+    "agent_name": "Tom Brown",
+    "answered_date_time": "2024-01-06 12:02:55",
+    "from_number": "+44928484809",
+    "disposition": "Callback",
+    "talk_time": 500
+  },
+  {
+    "call_id": "CALL000052",
+    "date_time": "2024-01-06 16:03:52",
+    "agent_name": "Tom Brown",
+    "answered_date_time": "2024-01-06 16:03:55",
+    "from_number": "+44670473728",
+    "disposition": "Transferred",
+    "talk_time": 550
+  },
+  {
+    "call_id": "CALL000053",
+    "date_time": "2024-01-06 09:53:20",
+    "agent_name": "Mike Wilson",
+    "answered_date_time": "2024-01-06 09:53:41",
+    "from_number": "+44296108065",
+    "disposition": "Callback",
+    "talk_time": 327
+  },
+  {
+    "call_id": "CALL000054",
+    "date_time": "2024-01-06 13:10:13",
+    "agent_name": "John Smith",
+    "answered_date_time": "2024-01-06 13:10:22",
+    "from_number": "+44299874202",
+    "disposition": "Voicemail",
+    "talk_time": 409
+  },
+  {
+    "call_id": "CALL000055",
+    "date_time": "2024-01-06 13:40:27",
+    "agent_name": "John Smith",
+    "answered_date_time": "2024-01-06 13:40:47",
+    "from_number": "+44406957122",
+    "disposition": "Resolved",
+    "talk_time": 58
+  },
+  {
+    "call_id": "CALL000056",
+    "date_time": "2024-01-06 10:44:00",
+    "agent_name": "John Smith",
+    "answered_date_time": "2024-01-06 10:44:10",
+    "from_number": "+44515511247",
+    "disposition": "Voicemail",
+    "talk_time": 274
+  },
+  {
+    "call_id": "CALL000057",
+    "date_time": "2024-01-06 10:20:23",
+    "agent_name": "Emma Davis",
+    "answered_date_time": "2024-01-06 10:20:32",
+    "from_number": "+44366302318",
+    "disposition": "Transferred",
+    "talk_time": 189
+  },
+  {
+    "call_id": "CALL000058",
+    "date_time": "2024-01-06 16:05:12",
+    "agent_name": "Tom Brown",
+    "answered_date_time": "2024-01-06 16:05:31",
+    "from_number": "+44958240116",
+    "disposition": "Resolved",
+    "talk_time": 223
+  },
+  {
+    "call_id": "CALL000059",
+    "date_time": "2024-01-06 13:06:58",
+    "agent_name": "Mike Wilson",
+    "answered_date_time": "2024-01-06 13:07:12",
+    "from_number": "+4494574701",
+    "disposition": "Voicemail",
+    "talk_time": 112
+  },
+  {
+    "call_id": "CALL000060",
+    "date_time": "2024-01-06 10:55:16",
+    "agent_name": "Tom Brown",
+    "answered_date_time": "2024-01-06 10:55:36",
+    "from_number": "+44504466530",
+    "disposition": "Voicemail",
+    "talk_time": 587
+  },
+  {
+    "call_id": "CALL000061",
+    "date_time": "2024-01-07 11:40:07",
+    "agent_name": "John Smith",
+    "answered_date_time": "2024-01-07 11:40:26",
+    "from_number": "+44634692690",
+    "disposition": "Resolved",
+    "talk_time": 137
+  },
+  {
+    "call_id": "CALL000062",
+    "date_time": "2024-01-07 16:21:00",
+    "agent_name": "Emma Davis",
+    "answered_date_time": "2024-01-07 16:21:12",
+    "from_number": "+44783437494",
+    "disposition": "Callback",
+    "talk_time": 566
+  },
+  {
+    "call_id": "CALL000063",
+    "date_time": "2024-01-07 12:23:51",
+    "agent_name": "Mike Wilson",
+    "answered_date_time": "2024-01-07 12:24:12",
+    "from_number": "+44358721328",
+    "disposition": "Transferred",
+    "talk_time": 322
+  },
+  {
+    "call_id": "CALL000064",
+    "date_time": "2024-01-07 09:00:28",
+    "agent_name": "John Smith",
+    "answered_date_time": "2024-01-07 09:00:48",
+    "from_number": "+4427397695",
+    "disposition": "Transferred",
+    "talk_time": 123
+  },
+  {
+    "call_id": "CALL000065",
+    "date_time": "2024-01-07 16:52:39",
+    "agent_name": "John Smith",
+    "answered_date_time": "2024-01-07 16:52:46",
+    "from_number": "+44426601675",
+    "disposition": "Callback",
+    "talk_time": 102
+  },
+  {
+    "call_id": "CALL000066",
+    "date_time": "2024-01-07 13:38:47",
+    "agent_name": "Emma Davis",
+    "answered_date_time": "2024-01-07 13:38:48",
+    "from_number": "+44964042807",
+    "disposition": "Transferred",
+    "talk_time": 224
+  },
+  {
+    "call_id": "CALL000067",
+    "date_time": "2024-01-07 14:51:13",
+    "agent_name": "Emma Davis",
+    "answered_date_time": "2024-01-07 14:51:41",
+    "from_number": "+44479051118",
+    "disposition": "Voicemail",
+    "talk_time": 490
+  },
+  {
+    "call_id": "CALL000068",
+    "date_time": "2024-01-07 09:29:31",
+    "agent_name": "Tom Brown",
+    "answered_date_time": "2024-01-07 09:29:50",
+    "from_number": "+44725473495",
+    "disposition": "Voicemail",
+    "talk_time": 148
+  },
+  {
+    "call_id": "CALL000069",
+    "date_time": "2024-01-07 10:19:28",
+    "agent_name": "John Smith",
+    "answered_date_time": "2024-01-07 10:19:40",
+    "from_number": "+44908021034",
+    "disposition": "Transferred",
+    "talk_time": 393
+  },
+  {
+    "call_id": "CALL000070",
+    "date_time": "2024-01-07 09:51:27",
+    "agent_name": "John Smith",
+    "answered_date_time": "2024-01-07 09:51:41",
+    "from_number": "+44731158832",
+    "disposition": "Voicemail",
+    "talk_time": 88
+  },
+  {
+    "call_id": "CALL000071",
+    "date_time": "2024-01-08 11:01:20",
+    "agent_name": "John Smith",
+    "answered_date_time": "2024-01-08 11:01:35",
+    "from_number": "+44696136145",
+    "disposition": "Voicemail",
+    "talk_time": 206
+  },
+  {
+    "call_id": "CALL000072",
+    "date_time": "2024-01-08 16:04:00",
+    "agent_name": "John Smith",
+    "answered_date_time": "2024-01-08 16:04:19",
+    "from_number": "+44671588662",
+    "disposition": "Resolved",
+    "talk_time": 148
+  },
+  {
+    "call_id": "CALL000073",
+    "date_time": "2024-01-08 09:56:59",
+    "agent_name": "Sarah Johnson",
+    "answered_date_time": "2024-01-08 09:57:08",
+    "from_number": "+44721242612",
+    "disposition": "Voicemail",
+    "talk_time": 401
+  },
+  {
+    "call_id": "CALL000074",
+    "date_time": "2024-01-08 11:01:31",
+    "agent_name": "Mike Wilson",
+    "answered_date_time": "2024-01-08 11:01:44",
+    "from_number": "+44507437640",
+    "disposition": "Transferred",
+    "talk_time": 105
+  },
+  {
+    "call_id": "CALL000075",
+    "date_time": "2024-01-08 15:30:19",
+    "agent_name": "John Smith",
+    "answered_date_time": "2024-01-08 15:30:37",
+    "from_number": "+44769382411",
+    "disposition": "Voicemail",
+    "talk_time": 281
+  },
+  {
+    "call_id": "CALL000076",
+    "date_time": "2024-01-08 09:02:57",
+    "agent_name": "Emma Davis",
+    "answered_date_time": "2024-01-08 09:03:19",
+    "from_number": "+44196284451",
+    "disposition": "Resolved",
+    "talk_time": 609
+  },
+  {
+    "call_id": "CALL000077",
+    "date_time": "2024-01-08 15:34:07",
+    "agent_name": "John Smith",
+    "answered_date_time": "2024-01-08 15:34:30",
+    "from_number": "+44840490938",
+    "disposition": "Callback",
+    "talk_time": 45
+  },
+  {
+    "call_id": "CALL000078",
+    "date_time": "2024-01-08 14:31:05",
+    "agent_name": "Emma Davis",
+    "answered_date_time": "2024-01-08 14:31:32",
+    "from_number": "+44620845537",
+    "disposition": "Callback",
+    "talk_time": 283
+  },
+  {
+    "call_id": "CALL000079",
+    "date_time": "2024-01-08 14:24:41",
+    "agent_name": "Mike Wilson",
+    "answered_date_time": "2024-01-08 14:25:00",
+    "from_number": "+44487143121",
+    "disposition": "Voicemail",
+    "talk_time": 380
+  },
+  {
+    "call_id": "CALL000080",
+    "date_time": "2024-01-08 10:01:01",
+    "agent_name": "Emma Davis",
+    "answered_date_time": "2024-01-08 10:01:26",
+    "from_number": "+44701148372",
+    "disposition": "Resolved",
+    "talk_time": 603
+  },
+  {
+    "call_id": "CALL000081",
+    "date_time": "2024-01-09 15:46:01",
+    "agent_name": "Sarah Johnson",
+    "answered_date_time": "2024-01-09 15:46:26",
+    "from_number": "+44835587062",
+    "disposition": "Resolved",
+    "talk_time": 592
+  },
+  {
+    "call_id": "CALL000082",
+    "date_time": "2024-01-09 16:57:44",
+    "agent_name": "Sarah Johnson",
+    "answered_date_time": "2024-01-09 16:58:10",
+    "from_number": "+44331481804",
+    "disposition": "Voicemail",
+    "talk_time": 450
+  },
+  {
+    "call_id": "CALL000083",
+    "date_time": "2024-01-09 15:53:26",
+    "agent_name": "Tom Brown",
+    "answered_date_time": "2024-01-09 15:53:45",
+    "from_number": "+44157462532",
+    "disposition": "Voicemail",
+    "talk_time": 317
+  },
+  {
+    "call_id": "CALL000084",
+    "date_time": "2024-01-09 12:16:45",
+    "agent_name": "Emma Davis",
+    "answered_date_time": "2024-01-09 12:17:01",
+    "from_number": "+44539106579",
+    "disposition": "Resolved",
+    "talk_time": 555
+  },
+  {
+    "call_id": "CALL000085",
+    "date_time": "2024-01-09 16:08:36",
+    "agent_name": "Mike Wilson",
+    "answered_date_time": "2024-01-09 16:08:36",
+    "from_number": "+44995371279",
+    "disposition": "Callback",
+    "talk_time": 421
+  },
+  {
+    "call_id": "CALL000086",
+    "date_time": "2024-01-09 12:38:43",
+    "agent_name": "Mike Wilson",
+    "answered_date_time": "2024-01-09 12:38:56",
+    "from_number": "+44182190081",
+    "disposition": "Transferred",
+    "talk_time": 193
+  },
+  {
+    "call_id": "CALL000087",
+    "date_time": "2024-01-09 11:21:03",
+    "agent_name": "Sarah Johnson",
+    "answered_date_time": "2024-01-09 11:21:03",
+    "from_number": "+44927875463",
+    "disposition": "Callback",
+    "talk_time": 34
+  },
+  {
+    "call_id": "CALL000088",
+    "date_time": "2024-01-09 11:44:35",
+    "agent_name": "Tom Brown",
+    "answered_date_time": "2024-01-09 11:44:49",
+    "from_number": "+44448882438",
+    "disposition": "Transferred",
+    "talk_time": 482
+  },
+  {
+    "call_id": "CALL000089",
+    "date_time": "2024-01-09 11:50:09",
+    "agent_name": "John Smith",
+    "answered_date_time": "2024-01-09 11:50:32",
+    "from_number": "+44348700711",
+    "disposition": "Voicemail",
+    "talk_time": 587
+  },
+  {
+    "call_id": "CALL000090",
+    "date_time": "2024-01-09 16:19:08",
+    "agent_name": "John Smith",
+    "answered_date_time": "2024-01-09 16:19:36",
+    "from_number": "+44577401799",
+    "disposition": "Resolved",
+    "talk_time": 551
+  },
+  {
+    "call_id": "CALL000091",
+    "date_time": "2024-01-10 11:27:21",
+    "agent_name": "Mike Wilson",
+    "answered_date_time": "2024-01-10 11:27:37",
+    "from_number": "+44335187036",
+    "disposition": "Callback",
+    "talk_time": 204
+  },
+  {
+    "call_id": "CALL000092",
+    "date_time": "2024-01-10 14:28:08",
+    "agent_name": "John Smith",
+    "answered_date_time": "2024-01-10 14:28:31",
+    "from_number": "+44522432598",
+    "disposition": "Voicemail",
+    "talk_time": 373
+  },
+  {
+    "call_id": "CALL000093",
+    "date_time": "2024-01-10 15:27:30",
+    "agent_name": "Emma Davis",
+    "answered_date_time": "2024-01-10 15:27:49",
+    "from_number": "+44956829262",
+    "disposition": "Resolved",
+    "talk_time": 349
+  },
+  {
+    "call_id": "CALL000094",
+    "date_time": "2024-01-10 09:55:43",
+    "agent_name": "Mike Wilson",
+    "answered_date_time": "2024-01-10 09:55:56",
+    "from_number": "+44811552662",
+    "disposition": "Voicemail",
+    "talk_time": 268
+  },
+  {
+    "call_id": "CALL000095",
+    "date_time": "2024-01-10 16:38:22",
+    "agent_name": "Emma Davis",
+    "answered_date_time": "2024-01-10 16:38:41",
+    "from_number": "+4436674630",
+    "disposition": "Voicemail",
+    "talk_time": 236
+  },
+  {
+    "call_id": "CALL000096",
+    "date_time": "2024-01-10 14:53:45",
+    "agent_name": "Mike Wilson",
+    "answered_date_time": "2024-01-10 14:53:58",
+    "from_number": "+44648483316",
+    "disposition": "Callback",
+    "talk_time": 483
+  },
+  {
+    "call_id": "CALL000097",
+    "date_time": "2024-01-10 14:27:16",
+    "agent_name": "Mike Wilson",
+    "answered_date_time": "2024-01-10 14:27:44",
+    "from_number": "+44749967241",
+    "disposition": "Voicemail",
+    "talk_time": 301
+  },
+  {
+    "call_id": "CALL000098",
+    "date_time": "2024-01-10 14:29:33",
+    "agent_name": "Emma Davis",
+    "answered_date_time": "2024-01-10 14:29:56",
+    "from_number": "+44409690642",
+    "disposition": "Callback",
+    "talk_time": 563
+  },
+  {
+    "call_id": "CALL000099",
+    "date_time": "2024-01-10 15:24:00",
+    "agent_name": "Emma Davis",
+    "answered_date_time": "2024-01-10 15:24:08",
+    "from_number": "+44121783012",
+    "disposition": "Transferred",
+    "talk_time": 113
+  },
+  {
+    "call_id": "CALL000100",
+    "date_time": "2024-01-10 12:57:22",
+    "agent_name": "John Smith",
+    "answered_date_time": "2024-01-10 12:57:29",
+    "from_number": "+44712498306",
+    "disposition": "Callback",
+    "talk_time": 151
+  }
+]

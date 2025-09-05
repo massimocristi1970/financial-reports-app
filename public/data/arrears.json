@@ -1,1 +1,227 @@
- 
+[
+  {
+    "CustomerID": "CUST100000",
+    "Count": 1,
+    "StageDate": "2024-01-01",
+    "IssuedAmount": 30767,
+    "TierName": "Premium",
+    "Stage": "Arrears_60",
+    "PaymentStatus": "Late"
+  },
+  {
+    "CustomerID": "CUST100001",
+    "Count": 2,
+    "StageDate": "2024-01-04",
+    "IssuedAmount": 29210,
+    "TierName": "Basic",
+    "Stage": "Arrears_60",
+    "PaymentStatus": "Late"
+  },
+  {
+    "CustomerID": "CUST100002",
+    "Count": 1,
+    "StageDate": "2024-01-07",
+    "IssuedAmount": 16751,
+    "TierName": "Basic",
+    "Stage": "Arrears_30",
+    "PaymentStatus": "Late"
+  },
+  {
+    "CustomerID": "CUST100003",
+    "Count": 2,
+    "StageDate": "2024-01-10",
+    "IssuedAmount": 30859,
+    "TierName": "Basic",
+    "Stage": "Arrears_30",
+    "PaymentStatus": "Late"
+  },
+  {
+    "CustomerID": "CUST100004",
+    "Count": 1,
+    "StageDate": "2024-01-13",
+    "IssuedAmount": 23109,
+    "TierName": "Premium",
+    "Stage": "Arrears_30",
+    "PaymentStatus": "Late"
+  },
+  {
+    "CustomerID": "CUST100005",
+    "Count": 1,
+    "StageDate": "2024-01-16",
+    "IssuedAmount": 6938,
+    "TierName": "Standard",
+    "Stage": "Arrears_90",
+    "PaymentStatus": "Late"
+  },
+  {
+    "CustomerID": "CUST100006",
+    "Count": 1,
+    "StageDate": "2024-01-19",
+    "IssuedAmount": 26832,
+    "TierName": "Premium",
+    "Stage": "Arrears_30",
+    "PaymentStatus": "Late"
+  },
+  {
+    "CustomerID": "CUST100007",
+    "Count": 1,
+    "StageDate": "2024-01-22",
+    "IssuedAmount": 8343,
+    "TierName": "Premium",
+    "Stage": "Arrears_30",
+    "PaymentStatus": "Late"
+  },
+  {
+    "CustomerID": "CUST100008",
+    "Count": 2,
+    "StageDate": "2024-01-25",
+    "IssuedAmount": 24443,
+    "TierName": "Standard",
+    "Stage": "Arrears_60",
+    "PaymentStatus": "Late"
+  },
+  {
+    "CustomerID": "CUST100009",
+    "Count": 1,
+    "StageDate": "2024-01-28",
+    "IssuedAmount": 12331,
+    "TierName": "Basic",
+    "Stage": "Arrears_30",
+    "PaymentStatus": "Late"
+  },
+  {
+    "CustomerID": "CUST100010",
+    "Count": 1,
+    "StageDate": "2024-01-31",
+    "IssuedAmount": 27703,
+    "TierName": "Standard",
+    "Stage": "Arrears_60",
+    "PaymentStatus": "Late"
+  },
+  {
+    "CustomerID": "CUST100011",
+    "Count": 2,
+    "StageDate": "2024-02-03",
+    "IssuedAmount": 27431,
+    "TierName": "Standard",
+    "Stage": "Arrears_60",
+    "PaymentStatus": "Late"
+  },
+  {
+    "CustomerID": "CUST100012",
+    "Count": 1,
+    "StageDate": "2024-02-06",
+    "IssuedAmount": 26365,
+    "TierName": "Standard",
+    "Stage": "Arrears_90",
+    "PaymentStatus": "Late"
+  },
+  {
+    "CustomerID": "CUST100013",
+    "Count": 2,
+    "StageDate": "2024-02-09",
+    "IssuedAmount": 34177,
+    "TierName": "Basic",
+    "Stage": "Arrears_90",
+    "PaymentStatus": "Late"
+  },
+  {
+    "CustomerID": "CUST100014",
+    "Count": 2,
+    "StageDate": "2024-02-12",
+    "IssuedAmount": 33601,
+    "TierName": "Premium",
+    "Stage": "Arrears_30",
+    "PaymentStatus": "Late"
+  },
+  {
+    "CustomerID": "CUST100015",
+    "Count": 1,
+    "StageDate": "2024-02-15",
+    "IssuedAmount": 13481,
+    "TierName": "Basic",
+    "Stage": "Arrears_60",
+    "PaymentStatus": "Late"
+  },
+  {
+    "CustomerID": "CUST100016",
+    "Count": 1,
+    "StageDate": "2024-02-18",
+    "IssuedAmount": 22850,
+    "TierName": "Premium",
+    "Stage": "Arrears_30",
+    "PaymentStatus": "Late"
+  },
+  {
+    "CustomerID": "CUST100017",
+    "Count": 1,
+    "StageDate": "2024-02-21",
+    "IssuedAmount": 33481,
+    "TierName": "Premium",
+    "Stage": "Arrears_90",
+    "PaymentStatus": "Late"
+  },
+  {
+    "CustomerID": "CUST100018",
+    "Count": 1,
+    "StageDate": "2024-02-24",
+    "IssuedAmount": 28495,
+    "TierName": "Standard",
+    "Stage": "Arrears_90",
+    "PaymentStatus": "Late"
+  },
+  {
+    "CustomerID": "CUST100019",
+    "Count": 2,
+    "StageDate": "2024-02-27",
+    "IssuedAmount": 13909,
+    "TierName": "Premium",
+    "Stage": "Arrears_90",
+    "PaymentStatus": "Late"
+  },
+  {
+    "CustomerID": "CUST100020",
+    "Count": 2,
+    "StageDate": "2024-03-01",
+    "IssuedAmount": 28984,
+    "TierName": "Basic",
+    "Stage": "Arrears_30",
+    "PaymentStatus": "Late"
+  },
+  {
+    "CustomerID": "CUST100021",
+    "Count": 1,
+    "StageDate": "2024-03-04",
+    "IssuedAmount": 20884,
+    "TierName": "Premium",
+    "Stage": "Arrears_90",
+    "PaymentStatus": "Late"
+  },
+  {
+    "CustomerID": "CUST100022",
+    "Count": 1,
+    "StageDate": "2024-03-07",
+    "IssuedAmount": 12435,
+    "TierName": "Basic",
+    "Stage": "Arrears_90",
+    "PaymentStatus": "Late"
+  },
+  {
+    "CustomerID": "CUST100023",
+    "Count": 2,
+    "StageDate": "2024-03-10",
+    "IssuedAmount": 16854,
+    "TierName": "Basic",
+    "Stage": "Arrears_60",
+    "PaymentStatus": "Late"
+  },
+  {
+    "CustomerID": "CUST100024",
+    "Count": 2,
+    "StageDate": "2024-03-13",
+    "IssuedAmount": 6595,
+    "TierName": "Standard",
+    "Stage": "Arrears_90",
+    "PaymentStatus": "Late"
+  }
+]

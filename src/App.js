@@ -1,4 +1,5 @@
-import React, { Suspense, lazy, useEffect } from 'react'; // ADD useEffect HERE
+// src/App.js - FIXED VERSION
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { DataProvider } from './contexts/DataContext';
@@ -6,9 +7,8 @@ import { FilterProvider } from './contexts/FilterContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import Layout from './components/common/Layout';
 import LoadingSpinner from './components/common/LoadingSpinner';
-import './styles/globals.css';
 import './App.css';
-
+import './styles/globals.css'; // Import theme CSS
 
 // Lazy load dashboard components for better performance
 const OverviewDashboard = lazy(() => import('./components/dashboards/OverviewDashboard'));
@@ -33,8 +33,9 @@ const RouteLoader = ({ children }) => (
 
 // Protected route wrapper for admin functionality
 const ProtectedRoute = ({ children, requiresAdmin = false }) => {
-  const isAuthenticated = true;
-  const isAdmin = true;
+  // In a real app, you'd check authentication here
+  const isAuthenticated = true; // Replace with actual auth check
+  const isAdmin = true; // Replace with actual admin check
   
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
@@ -56,6 +57,7 @@ const AppErrorFallback = ({ error, resetErrorBoundary }) => (
       <details className="error-details">
         <summary>Error details</summary>
         <pre>{error.message}</pre>
+        <pre>{error.stack}</pre>
       </details>
       <div className="error-actions">
         <button onClick={resetErrorBoundary} className="btn btn-primary">
@@ -70,39 +72,74 @@ const AppErrorFallback = ({ error, resetErrorBoundary }) => (
 );
 
 function App() {
-  useEffect(() => {
-  const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-  
-  const handleThemeChange = (e) => {
-    const theme = e.matches ? 'dark' : 'light';
-    document.documentElement.setAttribute('data-theme', theme);
-    document.body.className = theme + '-theme'; // Add this line
-  };
-  
-  handleThemeChange(mediaQuery);
-  mediaQuery.addEventListener('change', handleThemeChange);
-  
-  return () => mediaQuery.removeEventListener('change', handleThemeChange);
-}, []);
-
   return (
     <ErrorBoundary fallback={AppErrorFallback}>
       <ThemeProvider>
         <DataProvider>
           <FilterProvider>
-            <Router basename={process.env.NODE_ENV === 'production' ? '/dashboard' : ''}>
-              <Layout>
+            <Router basename={process.env.NODE_ENV === 'production' ? '/financial-reports' : '/'}>
+              <div className="App">
                 <Routes>
-					<Route path="/" element={<RouteLoader><OverviewDashboard /></RouteLoader>} />
-					<Route path="/lending" element={<RouteLoader><LendingDashboard /></RouteLoader>} />
-					<Route path="/arrears" element={<RouteLoader><ArrearsDashboard /></RouteLoader>} />
-					<Route path="/liquidations" element={<RouteLoader><LiquidationsDashboard /></RouteLoader>} />
-					<Route path="/call-center" element={<RouteLoader><CallCenterDashboard /></RouteLoader>} />
-					<Route path="/complaints" element={<RouteLoader><ComplaintsDashboard /></RouteLoader>} />
-					<Route path="/admin" element={<ProtectedRoute requiresAdmin={true}><RouteLoader><AdminPanel /></RouteLoader></ProtectedRoute>} />
-					<Route path="*" element={<Navigate to="/" replace />} />
-				</Routes>
-              </Layout>
+                  {/* Main layout routes */}
+                  <Route path="/" element={<Layout />}>
+                    {/* Overview Dashboard */}
+                    <Route index element={
+                      <RouteLoader>
+                        <OverviewDashboard />
+                      </RouteLoader>
+                    } />
+                    
+                    {/* Report Dashboards */}
+                    <Route path="lending-volume" element={
+                      <RouteLoader>
+                        <LendingDashboard />
+                      </RouteLoader>
+                    } />
+                    
+                    <Route path="arrears" element={
+                      <RouteLoader>
+                        <ArrearsDashboard />
+                      </RouteLoader>
+                    } />
+                    
+                    <Route path="liquidations" element={
+                      <RouteLoader>
+                        <LiquidationsDashboard />
+                      </RouteLoader>
+                    } />
+                    
+                    <Route path="call-center" element={
+                      <RouteLoader>
+                        <CallCenterDashboard />
+                      </RouteLoader>
+                    } />
+                    
+                    <Route path="complaints" element={
+                      <RouteLoader>
+                        <ComplaintsDashboard />
+                      </RouteLoader>
+                    } />
+                    
+                    {/* Admin Panel */}
+                    <Route path="admin" element={
+                      <ProtectedRoute requiresAdmin={true}>
+                        <RouteLoader>
+                          <AdminPanel />
+                        </RouteLoader>
+                      </ProtectedRoute>
+                    } />
+                  </Route>
+                  
+                  {/* 404 Not Found */}
+                  <Route path="*" element={
+                    <div className="not-found">
+                      <h1>404 - Page Not Found</h1>
+                      <p>The page you're looking for doesn't exist.</p>
+                      <Navigate to="/" replace />
+                    </div>
+                  } />
+                </Routes>
+              </div>
             </Router>
           </FilterProvider>
         </DataProvider>
