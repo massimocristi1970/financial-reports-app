@@ -122,12 +122,23 @@ const FileValidator = ({
     // Convert to string if it's not already
     const strValue = String(value).trim();
     
-    // ULTRA BULLETPROOF: Extract only digits and decimal points
+    // NUCLEAR OPTION: Extract only ASCII digits
     let cleaned = '';
     for (let i = 0; i < strValue.length; i++) {
       const char = strValue[i];
-      if ((char >= '0' && char <= '9') || char === '.' || char === '-') {
+      const charCode = char.charCodeAt(0);
+      
+      // Only keep ASCII digits (48-57), decimal point (46), and minus (45)
+      if ((charCode >= 48 && charCode <= 57) || charCode === 46 || charCode === 45) {
         cleaned += char;
+      }
+    }
+    
+    // If no valid number found, try extracting digits with regex
+    if (!cleaned || isNaN(parseFloat(cleaned))) {
+      const matches = strValue.match(/\d+/g);
+      if (matches) {
+        cleaned = matches.join('');
       }
     }
     
