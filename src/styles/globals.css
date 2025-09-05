@@ -644,3 +644,22 @@ em, i {
 * {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
 }
+
+/* Theme overrides - add at the very end */
+.light-theme {
+  color: #1e293b !important;
+  background-color: #ffffff !important;
+}
+
+.dark-theme {
+  color: #f8fafc !important;
+  background-color: #0f172a !important;
+}
+
+.dark-theme * {
+  color: #f8fafc !important;
+}
+
+.light-theme * {
+  color: #1e293b !important;
+}

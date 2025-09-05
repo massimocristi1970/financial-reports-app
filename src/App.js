@@ -71,9 +71,19 @@ const AppErrorFallback = ({ error, resetErrorBoundary }) => (
 
 function App() {
   useEffect(() => {
-    // Import the CSS file that has the theme variables
-    import('./styles/globals.css');
-  }, []);
+  const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+  
+  const handleThemeChange = (e) => {
+    const theme = e.matches ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', theme);
+    document.body.className = theme + '-theme'; // Add this line
+  };
+  
+  handleThemeChange(mediaQuery);
+  mediaQuery.addEventListener('change', handleThemeChange);
+  
+  return () => mediaQuery.removeEventListener('change', handleThemeChange);
+}, []);
 
   return (
     <ErrorBoundary fallback={AppErrorFallback}>
