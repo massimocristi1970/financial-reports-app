@@ -122,8 +122,14 @@ const FileValidator = ({
     // Convert to string if it's not already
     const strValue = String(value).trim();
     
-    // BULLETPROOF: Remove everything except digits, decimal points, and minus signs
-    const cleaned = strValue.replace(/[^\d.-]/g, '');
+    // ULTRA BULLETPROOF: Extract only digits and decimal points
+    let cleaned = '';
+    for (let i = 0; i < strValue.length; i++) {
+      const char = strValue[i];
+      if ((char >= '0' && char <= '9') || char === '.' || char === '-') {
+        cleaned += char;
+      }
+    }
     
     return parseFloat(cleaned) || 0;
   }, []);
