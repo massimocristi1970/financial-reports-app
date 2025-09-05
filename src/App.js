@@ -1,16 +1,15 @@
-// src/App.js - WITH SYSTEM THEME DETECTION
+// src/App.js - MINIMAL THEME DETECTION
 import React, { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { DataProvider } from './contexts/DataContext';
 import { FilterProvider } from './contexts/FilterContext';
-import { ThemeProvider } from './contexts/ThemeContext';
 import Layout from './components/common/Layout';
 import LoadingSpinner from './components/common/LoadingSpinner';
 import './App.css';
 import './styles/globals.css';
 
-// Lazy load dashboard components for better performance
+// Lazy load dashboard components
 const OverviewDashboard = lazy(() => import('./components/dashboards/OverviewDashboard'));
 const LendingDashboard = lazy(() => import('./components/dashboards/LendingDashboard'));
 const ArrearsDashboard = lazy(() => import('./components/dashboards/ArrearsDashboard'));
@@ -31,49 +30,10 @@ const RouteLoader = ({ children }) => (
   </Suspense>
 );
 
-// Simple system theme detection component
-const SystemThemeDetector = () => {
-  useEffect(() => {
-    // Detect system theme on app start
-    const detectSystemTheme = () => {
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const theme = prefersDark ? 'dark' : 'light';
-      
-      // Apply theme class to body
-      document.body.className = `${theme}-theme`;
-      document.body.setAttribute('data-theme', theme);
-      
-      console.log(`System theme detected: ${theme}`);
-    };
-
-    // Detect on mount
-    detectSystemTheme();
-
-    // Listen for system theme changes
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleThemeChange = (e) => {
-      const theme = e.matches ? 'dark' : 'light';
-      document.body.className = `${theme}-theme`;
-      document.body.setAttribute('data-theme', theme);
-      console.log(`System theme changed to: ${theme}`);
-    };
-
-    mediaQuery.addEventListener('change', handleThemeChange);
-
-    // Cleanup
-    return () => {
-      mediaQuery.removeEventListener('change', handleThemeChange);
-    };
-  }, []);
-
-  return null; // This component doesn't render anything
-};
-
-// Protected route wrapper for admin functionality
+// Protected route wrapper
 const ProtectedRoute = ({ children, requiresAdmin = false }) => {
-  // In a real app, you'd check authentication here
-  const isAuthenticated = true; // Replace with actual auth check
-  const isAdmin = true; // Replace with actual admin check
+  const isAuthenticated = true;
+  const isAdmin = true;
   
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
@@ -86,7 +46,7 @@ const ProtectedRoute = ({ children, requiresAdmin = false }) => {
   return children;
 };
 
-// App error fallback component
+// App error fallback
 const AppErrorFallback = ({ error, resetErrorBoundary }) => (
   <div className="app-error-fallback">
     <div className="error-container">
@@ -95,7 +55,6 @@ const AppErrorFallback = ({ error, resetErrorBoundary }) => (
       <details className="error-details">
         <summary>Error details</summary>
         <pre>{error.message}</pre>
-        <pre>{error.stack}</pre>
       </details>
       <div className="error-actions">
         <button onClick={resetErrorBoundary} className="btn btn-primary">
@@ -110,79 +69,98 @@ const AppErrorFallback = ({ error, resetErrorBoundary }) => (
 );
 
 function App() {
+  // Simple theme detection without context
+  useEffect(() => {
+    const applyTheme = (isDark) => {
+      const theme = isDark ? 'dark' : 'light';
+      document.body.className = `${theme}-theme`;
+      document.body.setAttribute('data-theme', theme);
+      console.log(`Applied theme: ${theme}`);
+    };
+
+    // Check system preference
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    
+    // Apply initial theme
+    applyTheme(mediaQuery.matches);
+
+    // Listen for changes
+    const handleChange = (e) => applyTheme(e.matches);
+    mediaQuery.addEventListener('change', handleChange);
+
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
+
   return (
     <ErrorBoundary fallback={AppErrorFallback}>
-      <ThemeProvider>
-        <SystemThemeDetector />
-        <DataProvider>
-          <FilterProvider>
-            <Router basename={process.env.NODE_ENV === 'production' ? '/financial-reports' : '/'}>
-              <div className="App">
-                <Routes>
-                  {/* Main layout routes */}
-                  <Route path="/" element={<Layout />}>
-                    {/* Overview Dashboard */}
-                    <Route index element={
-                      <RouteLoader>
-                        <OverviewDashboard />
-                      </RouteLoader>
-                    } />
-                    
-                    {/* Report Dashboards */}
-                    <Route path="lending-volume" element={
-                      <RouteLoader>
-                        <LendingDashboard />
-                      </RouteLoader>
-                    } />
-                    
-                    <Route path="arrears" element={
-                      <RouteLoader>
-                        <ArrearsDashboard />
-                      </RouteLoader>
-                    } />
-                    
-                    <Route path="liquidations" element={
-                      <RouteLoader>
-                        <LiquidationsDashboard />
-                      </RouteLoader>
-                    } />
-                    
-                    <Route path="call-center" element={
-                      <RouteLoader>
-                        <CallCenterDashboard />
-                      </RouteLoader>
-                    } />
-                    
-                    <Route path="complaints" element={
-                      <RouteLoader>
-                        <ComplaintsDashboard />
-                      </RouteLoader>
-                    } />
-                    
-                    {/* Admin Panel */}
-                    <Route path="admin" element={
-                      <ProtectedRoute requiresAdmin={true}>
-                        <RouteLoader>
-                          <AdminPanel />
-                        </RouteLoader>
-                      </ProtectedRoute>
-                    } />
-                  </Route>
-                  
-                  {/* 404 Not Found */}
-                  <Route path="*" element={
-                    <div className="not-found">
-                      <h1>404 - Page Not Found</h1>
-                      <p>The page you're looking for doesn't exist.</p>
-                      <Navigate to="/" replace />
-                    </div>
+      <DataProvider>
+        <FilterProvider>
+          <Router basename={process.env.NODE_ENV === 'production' ? '/financial-reports' : '/'}>
+            <div className="App">
+              <Routes>
+                {/* Main layout routes */}
+                <Route path="/" element={<Layout />}>
+                  {/* Overview Dashboard */}
+                  <Route index element={
+                    <RouteLoader>
+                      <OverviewDashboard />
+                    </RouteLoader>
                   } />
-                </Routes>
-              </div>
-            </Router>
-          </FilterProvider>
-        </DataProvider>
-      </ThemeProvider>
+                  
+                  {/* Report Dashboards */}
+                  <Route path="lending-volume" element={
+                    <RouteLoader>
+                      <LendingDashboard />
+                    </RouteLoader>
+                  } />
+                  
+                  <Route path="arrears" element={
+                    <RouteLoader>
+                      <ArrearsDashboard />
+                    </RouteLoader>
+                  } />
+                  
+                  <Route path="liquidations" element={
+                    <RouteLoader>
+                      <LiquidationsDashboard />
+                    </RouteLoader>
+                  } />
+                  
+                  <Route path="call-center" element={
+                    <RouteLoader>
+                      <CallCenterDashboard />
+                    </RouteLoader>
+                  } />
+                  
+                  <Route path="complaints" element={
+                    <RouteLoader>
+                      <ComplaintsDashboard />
+                    </RouteLoader>
+                  } />
+                  
+                  {/* Admin Panel */}
+                  <Route path="admin" element={
+                    <ProtectedRoute requiresAdmin={true}>
+                      <RouteLoader>
+                        <AdminPanel />
+                      </RouteLoader>
+                    </ProtectedRoute>
+                  } />
+                </Route>
+                
+                {/* 404 Not Found */}
+                <Route path="*" element={
+                  <div className="not-found">
+                    <h1>404 - Page Not Found</h1>
+                    <p>The page you're looking for doesn't exist.</p>
+                    <Navigate to="/" replace />
+                  </div>
+                } />
+              </Routes>
+            </div>
+          </Router>
+        </FilterProvider>
+      </DataProvider>
     </ErrorBoundary>
   );
 }
