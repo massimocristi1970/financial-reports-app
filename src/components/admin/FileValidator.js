@@ -122,12 +122,8 @@ const FileValidator = ({
     // Convert to string if it's not already
     const strValue = String(value).trim();
     
-    // Remove currency symbols, commas, and whitespace
-    // FIXED: Handle corrupted £ symbols (� character)
-    const cleaned = strValue
-      .replace(/[£$€¥�]/g, '') // Remove currency symbols INCLUDING corrupted £ (�)
-      .replace(/,/g, '') // Remove commas
-      .replace(/\s/g, ''); // Remove whitespace
+    // BULLETPROOF: Remove everything except digits, decimal points, and minus signs
+    const cleaned = strValue.replace(/[^\d.-]/g, '');
     
     return parseFloat(cleaned) || 0;
   }, []);
