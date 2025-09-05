@@ -1,665 +1,162 @@
-	  
-/* src/styles/globals.css */
+// create-sample-data.js
+// Run this script to create sample data files in public/data directory
 
-/* ============================================================================
-   CSS CUSTOM PROPERTIES (CSS Variables)
-   ============================================================================ */
+const fs = require('fs');
+const path = require('path');
 
-:root {
-  /* Color Palette */
-  --color-primary: #2563eb;
-  --color-primary-dark: #1d4ed8;
-  --color-primary-light: #3b82f6;
-  --color-secondary: #64748b;
-  --color-secondary-dark: #475569;
-  --color-secondary-light: #94a3b8;
+// Sample data generators
+const generateLendingVolume = () => {
+  const data = [];
+  const startDate = new Date('2024-01-01');
   
-  /* Success/Error/Warning Colors */
-  --color-success: #10b981;
-  --color-success-light: #34d399;
-  --color-success-dark: #059669;
-  --color-error: #ef4444;
-  --color-error-light: #f87171;
-  --color-error-dark: #dc2626;
-  --color-warning: #f59e0b;
-  --color-warning-light: #fbbf24;
-  --color-warning-dark: #d97706;
-  --color-info: #3b82f6;
-  --color-info-light: #60a5fa;
-  --color-info-dark: #2563eb;
+  for (let i = 0; i < 50; i++) {
+    const date = new Date(startDate);
+    date.setDate(date.getDate() + (i * 2));
+    
+    data.push({
+      CustomerID: `CUST${String(100000 + i).padStart(6, '0')}`,
+      Count: Math.floor(Math.random() * 3) + 1,
+      StageDate: date.toISOString().split('T')[0],
+      IssuedAmount: Math.floor(Math.random() * 40000) + 5000,
+      TierName: ['Premium', 'Standard', 'Basic'][Math.floor(Math.random() * 3)],
+      Stage: ['Active', 'Pending', 'Completed'][Math.floor(Math.random() * 3)],
+      PaymentStatus: ['Current', 'Late', 'Paid'][Math.floor(Math.random() * 3)]
+    });
+  }
+  return data;
+};
 
-  /* Neutral Colors */
-  --color-white: #ffffff;
-  --color-gray-50: #f8fafc;
-  --color-gray-100: #f1f5f9;
-  --color-gray-200: #e2e8f0;
-  --color-gray-300: #cbd5e1;
-  --color-gray-400: #94a3b8;
-  --color-gray-500: #64748b;
-  --color-gray-600: #475569;
-  --color-gray-700: #334155;
-  --color-gray-800: #1e293b;
-  --color-gray-900: #0f172a;
+const generateArrears = () => {
+  const data = [];
+  const startDate = new Date('2024-01-01');
+  
+  for (let i = 0; i < 25; i++) {
+    const date = new Date(startDate);
+    date.setDate(date.getDate() + (i * 3));
+    
+    data.push({
+      CustomerID: `CUST${String(100000 + i).padStart(6, '0')}`,
+      Count: Math.floor(Math.random() * 2) + 1,
+      StageDate: date.toISOString().split('T')[0],
+      IssuedAmount: Math.floor(Math.random() * 30000) + 5000,
+      TierName: ['Premium', 'Standard', 'Basic'][Math.floor(Math.random() * 3)],
+      Stage: ['Arrears_30', 'Arrears_60', 'Arrears_90'][Math.floor(Math.random() * 3)],
+      PaymentStatus: 'Late'
+    });
+  }
+  return data;
+};
+
+const generateLiquidations = () => {
+  const data = [];
+  
+  for (let i = 0; i < 12; i++) {
+    const funded = Math.floor(Math.random() * 500000) + 200000;
+    const collected = Math.floor(funded * (0.6 + Math.random() * 0.3));
+    
+    data.push({
+      funded_year: 2024,
+      funded_month: i + 1,
+      funded: funded,
+      collected: collected,
+      actual_liquidation_rate: Math.round((collected / funded) * 100),
+      future_scheduled: Math.floor(funded * 0.1),
+      dmp_iva_collected: Math.floor(collected * 0.1),
+      all_together: collected + Math.floor(funded * 0.05),
+      forecast_liquidation_rate: Math.round(((collected + funded * 0.05) / funded) * 100),
+      total_due_not_scheduled: Math.floor((funded - collected) * 0.2)
+    });
+  }
+  return data;
+};
+
+const generateCallCenter = () => {
+  const data = [];
+  const agents = ['John Smith', 'Sarah Johnson', 'Mike Wilson', 'Emma Davis', 'Tom Brown'];
+  const dispositions = ['Resolved', 'Transferred', 'Callback', 'Voicemail'];
+  
+  for (let i = 0; i < 100; i++) {
+    const date = new Date('2024-01-01');
+    date.setDate(date.getDate() + Math.floor(i / 10));
+    date.setHours(9 + Math.floor(Math.random() * 8));
+    date.setMinutes(Math.floor(Math.random() * 60));
+    date.setSeconds(Math.floor(Math.random() * 60));
+    
+    const answered = new Date(date);
+    answered.setSeconds(answered.getSeconds() + Math.floor(Math.random() * 30));
+    
+    data.push({
+      call_id: `CALL${String(i + 1).padStart(6, '0')}`,
+      date_time: date.toISOString().replace('T', ' ').split('.')[0],
+      agent_name: agents[Math.floor(Math.random() * agents.length)],
+      answered_date_time: answered.toISOString().replace('T', ' ').split('.')[0],
+      from_number: `+44${Math.floor(Math.random() * 1000000000)}`,
+      disposition: dispositions[Math.floor(Math.random() * dispositions.length)],
+      talk_time: Math.floor(Math.random() * 600) + 30
+    });
+  }
+  return data;
+};
+
+const generateComplaints = () => {
+  const data = [];
+  const categories = ['Service Quality', 'Billing', 'Technical', 'Product', 'Staff Behavior'];
+  const decisions = ['Resolved', 'Upheld', 'Rejected', 'Pending'];
+  
+  for (let i = 0; i < 30; i++) {
+    const receivedDate = new Date('2024-01-01');
+    receivedDate.setDate(receivedDate.getDate() + (i * 2));
+    
+    const daysToResolve = Math.floor(Math.random() * 14) + 1;
+    const resolvedDate = new Date(receivedDate);
+    resolvedDate.setDate(resolvedDate.getDate() + daysToResolve);
+    
+    data.push({
+      CustomerID: `CUST${String(100000 + i).padStart(6, '0')}`,
+      count: 1,
+      received_date: receivedDate.toISOString().split('T')[0],
+      resolved_date: resolvedDate.toISOString().split('T')[0],
+      days_to_resolve: daysToResolve,
+      category: categories[Math.floor(Math.random() * categories.length)],
+      decision: decisions[Math.floor(Math.random() * decisions.length)]
+    });
+  }
+  return data;
+};
+
+// Main function to create all data files
+const createSampleData = () => {
+  console.log('Creating sample data files...');
+  
+  // Create public/data directory if it doesn't exist
+  const dataDir = path.join('public', 'data');
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+    console.log('✅ Created public/data directory');
   }
   
-  * ADD THIS SECTION HERE - Light theme defaults */
-:root,
-[data-theme="light"] {
-  --bg-primary: var(--color-white);
-  --bg-secondary: var(--color-gray-50);
-  --bg-tertiary: var(--color-gray-100);
-  --bg-card: var(--color-white);
-  --bg-sidebar: var(--color-white);
-  --bg-header: var(--color-white);
-
-  --text-primary: var(--color-gray-900);
-  --text-secondary: var(--color-gray-600);
-  --text-tertiary: var(--color-gray-400);
-  --text-inverse: var(--color-white);
-
-  --border-primary: var(--color-gray-200);
-  --border-secondary: var(--color-gray-300);
-}
-
-/* Dark theme overrides using data-theme attribute */
-[data-theme="dark"] {
-  --bg-primary: var(--color-gray-900);
-  --bg-secondary: var(--color-gray-800);
-  --bg-tertiary: var(--color-gray-700);
-  --bg-card: var(--color-gray-800);
-  --bg-sidebar: var(--color-gray-900);
-  --bg-header: var(--color-gray-800);
-
-  --text-primary: var(--color-gray-100);
-  --text-secondary: var(--color-gray-300);
-  --text-tertiary: var(--color-gray-400);
-  --text-inverse: var(--color-gray-900);
-
-  --border-primary: var(--color-gray-700);
-  --border-secondary: var(--color-gray-600);
-}
+  // Generate and save each data file
+  const dataFiles = {
+    'lending-volume.json': generateLendingVolume(),
+    'arrears.json': generateArrears(),
+    'liquidations.json': generateLiquidations(),
+    'call-center.json': generateCallCenter(),
+    'complaints.json': generateComplaints()
+  };
   
-@media (prefers-color-scheme: dark) {
-  :root {
-    /* Background Colors for Dark Mode */
-    --bg-primary: var(--color-gray-900);
-    --bg-secondary: var(--color-gray-800);
-    --bg-tertiary: var(--color-gray-700);
-    --bg-card: var(--color-gray-800);
-    --bg-overlay: rgba(0, 0, 0, 0.7);
-    --bg-sidebar: var(--color-gray-900);
-    --bg-header: var(--color-gray-800);
-
-    /* Text Colors for Dark Mode */
-    --text-primary: var(--color-gray-100);
-    --text-secondary: var(--color-gray-300);
-    --text-tertiary: var(--color-gray-400);
-    --text-inverse: var(--color-gray-900);
-
-    /* Border Colors for Dark Mode */
-    --border-primary: var(--color-gray-700);
-    --border-secondary: var(--color-gray-600);
-
-    /* Shadows for Dark Mode */
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
-    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
-    --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
-  }
-}
-  /* Typography */
-  --font-family-sans: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  --font-family-mono: 'Consolas', 'Monaco', 'Courier New', monospace;
+  Object.entries(dataFiles).forEach(([filename, data]) => {
+    const filePath = path.join(dataDir, filename);
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+    console.log(`✅ Created ${filename} with ${data.length} records`);
+  });
   
-  /* Font Sizes */
-  --font-size-xs: 0.75rem;    /* 12px */
-  --font-size-sm: 0.875rem;   /* 14px */
-  --font-size-base: 1rem;     /* 16px */
-  --font-size-lg: 1.125rem;   /* 18px */
-  --font-size-xl: 1.25rem;    /* 20px */
-  --font-size-2xl: 1.5rem;    /* 24px */
-  --font-size-3xl: 1.875rem;  /* 30px */
-  --font-size-4xl: 2.25rem;   /* 36px */
-  --font-size-5xl: 3rem;      /* 48px */
+  console.log('🎉 All sample data files created successfully!');
+  console.log('You can now restart your React app to see the dashboards load with data.');
+};
 
-  /* Font Weights */
-  --font-weight-normal: 400;
-  --font-weight-medium: 500;
-  --font-weight-semibold: 600;
-  --font-weight-bold: 700;
-
-  /* Line Heights */
-  --line-height-tight: 1.25;
-  --line-height-normal: 1.5;
-  --line-height-relaxed: 1.75;
-
-  /* Spacing */
-  --spacing-0: 0;
-  --spacing-1: 0.25rem;  /* 4px */
-  --spacing-2: 0.5rem;   /* 8px */
-  --spacing-3: 0.75rem;  /* 12px */
-  --spacing-4: 1rem;     /* 16px */
-  --spacing-5: 1.25rem;  /* 20px */
-  --spacing-6: 1.5rem;   /* 24px */
-  --spacing-8: 2rem;     /* 32px */
-  --spacing-10: 2.5rem;  /* 40px */
-  --spacing-12: 3rem;    /* 48px */
-  --spacing-16: 4rem;    /* 64px */
-  --spacing-20: 5rem;    /* 80px */
-  --spacing-24: 6rem;    /* 96px */
-  --spacing-32: 8rem;    /* 128px */
-
-  /* Border Radius */
-  --radius-none: 0;
-  --radius-sm: 0.125rem;   /* 2px */
-  --radius-base: 0.25rem;  /* 4px */
-  --radius-md: 0.375rem;   /* 6px */
-  --radius-lg: 0.5rem;     /* 8px */
-  --radius-xl: 0.75rem;    /* 12px */
-  --radius-2xl: 1rem;      /* 16px */
-  --radius-full: 9999px;
-
-  /* Z-Index Scale */
-  --z-dropdown: 1000;
-  --z-sticky: 1020;
-  --z-fixed: 1030;
-  --z-modal-backdrop: 1040;
-  --z-modal: 1050;
-  --z-popover: 1060;
-  --z-tooltip: 1070;
-  --z-toast: 1080;
-
-  /* Layout Dimensions */
-  --header-height: 4rem;      /* 64px */
-  --sidebar-width: 16rem;     /* 256px */
-  --sidebar-width-collapsed: 4rem; /* 64px */
-  --container-max-width: 1200px;
-  --content-max-width: 1024px;
-
-  /* Transitions */
-  --transition-fast: 150ms ease-in-out;
-  --transition-normal: 200ms ease-in-out;
-  --transition-slow: 300ms ease-in-out;
-
-  /* Animation Durations */
-  --duration-75: 75ms;
-  --duration-100: 100ms;
-  --duration-150: 150ms;
-  --duration-200: 200ms;
-  --duration-300: 300ms;
-  --duration-500: 500ms;
-  --duration-700: 700ms;
-  --duration-1000: 1000ms;
-
-  /* Breakpoints (for reference in media queries) */
-  --breakpoint-sm: 640px;
-  --breakpoint-md: 768px;
-  --breakpoint-lg: 1024px;
-  --breakpoint-xl: 1280px;
-  --breakpoint-2xl: 1536px;
-
-
-
-/* ============================================================================
-   GLOBAL RESETS AND BASE STYLES
-   ============================================================================ */
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+// Run the script
+if (require.main === module) {
+  createSampleData();
 }
 
-html {
-  font-size: 16px;
-  line-height: 1.5;
-  -webkit-text-size-adjust: 100%;
-  -moz-text-size-adjust: 100%;
-  text-size-adjust: 100%;
-  scroll-behavior: smooth;
-}
-
-body {
-  font-family: var(--font-family-sans) !important;
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-normal);
-  line-height: var(--line-height-normal);
-  color: var(--text-primary);
-  background-color: var(--bg-primary);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-  transition: color 0.3s ease, background-color 0.3s ease;
-}
-
-/* ============================================================================
-   TYPOGRAPHY
-   ============================================================================ */
-
-h1, h2, h3, h4, h5, h6 {
-  font-weight: var(--font-weight-semibold);
-  line-height: var(--line-height-tight);
-  color: var(--text-primary);
-  margin-bottom: var(--spacing-4);
-}
-
-h1 {
-  font-size: var(--font-size-3xl);
-  font-weight: var(--font-weight-bold);
-}
-
-h2 {
-  font-size: var(--font-size-2xl);
-}
-
-h3 {
-  font-size: var(--font-size-xl);
-}
-
-h4 {
-  font-size: var(--font-size-lg);
-}
-
-h5 {
-  font-size: var(--font-size-base);
-}
-
-h6 {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-}
-
-p {
-  margin-bottom: var(--spacing-4);
-  color: var(--text-secondary);
-}
-
-a {
-  color: var(--text-link);
-  text-decoration: none;
-  transition: color var(--transition-fast);
-}
-
-a:hover {
-  color: var(--text-link-hover);
-}
-
-code {
-  font-family: var(--font-family-mono);
-  font-size: 0.875em;
-  background-color: var(--bg-tertiary);
-  padding: var(--spacing-1) var(--spacing-2);
-  border-radius: var(--radius-base);
-  color: var(--text-primary);
-}
-
-pre {
-  font-family: var(--font-family-mono);
-  background-color: var(--bg-tertiary);
-  padding: var(--spacing-4);
-  border-radius: var(--radius-md);
-  overflow-x: auto;
-  margin-bottom: var(--spacing-4);
-}
-
-strong, b {
-  font-weight: var(--font-weight-semibold);
-}
-
-em, i {
-  font-style: italic;
-}
-
-/* ============================================================================
-   UTILITY CLASSES
-   ============================================================================ */
-
-/* Visibility */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-.hidden {
-  display: none !important;
-}
-
-.invisible {
-  visibility: hidden !important;
-}
-
-/* Display */
-.block { display: block !important; }
-.inline-block { display: inline-block !important; }
-.inline { display: inline !important; }
-.flex { display: flex !important; }
-.inline-flex { display: inline-flex !important; }
-.grid { display: grid !important; }
-
-/* Flexbox Utilities */
-.flex-row { flex-direction: row !important; }
-.flex-col { flex-direction: column !important; }
-.flex-wrap { flex-wrap: wrap !important; }
-.flex-nowrap { flex-wrap: nowrap !important; }
-.items-start { align-items: flex-start !important; }
-.items-center { align-items: center !important; }
-.items-end { align-items: flex-end !important; }
-.items-stretch { align-items: stretch !important; }
-.justify-start { justify-content: flex-start !important; }
-.justify-center { justify-content: center !important; }
-.justify-end { justify-content: flex-end !important; }
-.justify-between { justify-content: space-between !important; }
-.justify-around { justify-content: space-around !important; }
-.flex-1 { flex: 1 1 0% !important; }
-.flex-auto { flex: 1 1 auto !important; }
-.flex-none { flex: none !important; }
-
-/* Spacing */
-.gap-1 { gap: var(--spacing-1) !important; }
-.gap-2 { gap: var(--spacing-2) !important; }
-.gap-3 { gap: var(--spacing-3) !important; }
-.gap-4 { gap: var(--spacing-4) !important; }
-.gap-5 { gap: var(--spacing-5) !important; }
-.gap-6 { gap: var(--spacing-6) !important; }
-.gap-8 { gap: var(--spacing-8) !important; }
-
-/* Margin */
-.m-0 { margin: 0 !important; }
-.m-1 { margin: var(--spacing-1) !important; }
-.m-2 { margin: var(--spacing-2) !important; }
-.m-3 { margin: var(--spacing-3) !important; }
-.m-4 { margin: var(--spacing-4) !important; }
-.m-auto { margin: auto !important; }
-
-.mt-0 { margin-top: 0 !important; }
-.mt-1 { margin-top: var(--spacing-1) !important; }
-.mt-2 { margin-top: var(--spacing-2) !important; }
-.mt-3 { margin-top: var(--spacing-3) !important; }
-.mt-4 { margin-top: var(--spacing-4) !important; }
-.mt-6 { margin-top: var(--spacing-6) !important; }
-.mt-8 { margin-top: var(--spacing-8) !important; }
-
-.mb-0 { margin-bottom: 0 !important; }
-.mb-1 { margin-bottom: var(--spacing-1) !important; }
-.mb-2 { margin-bottom: var(--spacing-2) !important; }
-.mb-3 { margin-bottom: var(--spacing-3) !important; }
-.mb-4 { margin-bottom: var(--spacing-4) !important; }
-.mb-6 { margin-bottom: var(--spacing-6) !important; }
-.mb-8 { margin-bottom: var(--spacing-8) !important; }
-
-.ml-0 { margin-left: 0 !important; }
-.ml-1 { margin-left: var(--spacing-1) !important; }
-.ml-2 { margin-left: var(--spacing-2) !important; }
-.ml-3 { margin-left: var(--spacing-3) !important; }
-.ml-4 { margin-left: var(--spacing-4) !important; }
-.ml-auto { margin-left: auto !important; }
-
-.mr-0 { margin-right: 0 !important; }
-.mr-1 { margin-right: var(--spacing-1) !important; }
-.mr-2 { margin-right: var(--spacing-2) !important; }
-.mr-3 { margin-right: var(--spacing-3) !important; }
-.mr-4 { margin-right: var(--spacing-4) !important; }
-.mr-auto { margin-right: auto !important; }
-
-/* Padding */
-.p-0 { padding: 0 !important; }
-.p-1 { padding: var(--spacing-1) !important; }
-.p-2 { padding: var(--spacing-2) !important; }
-.p-3 { padding: var(--spacing-3) !important; }
-.p-4 { padding: var(--spacing-4) !important; }
-.p-5 { padding: var(--spacing-5) !important; }
-.p-6 { padding: var(--spacing-6) !important; }
-.p-8 { padding: var(--spacing-8) !important; }
-
-.pt-0 { padding-top: 0 !important; }
-.pt-1 { padding-top: var(--spacing-1) !important; }
-.pt-2 { padding-top: var(--spacing-2) !important; }
-.pt-3 { padding-top: var(--spacing-3) !important; }
-.pt-4 { padding-top: var(--spacing-4) !important; }
-.pt-6 { padding-top: var(--spacing-6) !important; }
-.pt-8 { padding-top: var(--spacing-8) !important; }
-
-.pb-0 { padding-bottom: 0 !important; }
-.pb-1 { padding-bottom: var(--spacing-1) !important; }
-.pb-2 { padding-bottom: var(--spacing-2) !important; }
-.pb-3 { padding-bottom: var(--spacing-3) !important; }
-.pb-4 { padding-bottom: var(--spacing-4) !important; }
-.pb-6 { padding-bottom: var(--spacing-6) !important; }
-.pb-8 { padding-bottom: var(--spacing-8) !important; }
-
-.pl-0 { padding-left: 0 !important; }
-.pl-1 { padding-left: var(--spacing-1) !important; }
-.pl-2 { padding-left: var(--spacing-2) !important; }
-.pl-3 { padding-left: var(--spacing-3) !important; }
-.pl-4 { padding-left: var(--spacing-4) !important; }
-.pl-6 { padding-left: var(--spacing-6) !important; }
-
-.pr-0 { padding-right: 0 !important; }
-.pr-1 { padding-right: var(--spacing-1) !important; }
-.pr-2 { padding-right: var(--spacing-2) !important; }
-.pr-3 { padding-right: var(--spacing-3) !important; }
-.pr-4 { padding-right: var(--spacing-4) !important; }
-.pr-6 { padding-right: var(--spacing-6) !important; }
-
-/* Text Alignment */
-.text-left { text-align: left !important; }
-.text-center { text-align: center !important; }
-.text-right { text-align: right !important; }
-.text-justify { text-align: justify !important; }
-
-/* Text Colors */
-.text-primary { color: var(--text-primary) !important; }
-.text-secondary { color: var(--text-secondary) !important; }
-.text-tertiary { color: var(--text-tertiary) !important; }
-.text-inverse { color: var(--text-inverse) !important; }
-.text-success { color: var(--color-success) !important; }
-.text-error { color: var(--color-error) !important; }
-.text-warning { color: var(--color-warning) !important; }
-.text-info { color: var(--color-info) !important; }
-
-/* Font Weights */
-.font-normal { font-weight: var(--font-weight-normal) !important; }
-.font-medium { font-weight: var(--font-weight-medium) !important; }
-.font-semibold { font-weight: var(--font-weight-semibold) !important; }
-.font-bold { font-weight: var(--font-weight-bold) !important; }
-
-/* Font Sizes */
-.text-xs { font-size: var(--font-size-xs) !important; }
-.text-sm { font-size: var(--font-size-sm) !important; }
-.text-base { font-size: var(--font-size-base) !important; }
-.text-lg { font-size: var(--font-size-lg) !important; }
-.text-xl { font-size: var(--font-size-xl) !important; }
-.text-2xl { font-size: var(--font-size-2xl) !important; }
-
-/* Border Radius */
-.rounded-none { border-radius: var(--radius-none) !important; }
-.rounded-sm { border-radius: var(--radius-sm) !important; }
-.rounded { border-radius: var(--radius-base) !important; }
-.rounded-md { border-radius: var(--radius-md) !important; }
-.rounded-lg { border-radius: var(--radius-lg) !important; }
-.rounded-xl { border-radius: var(--radius-xl) !important; }
-.rounded-full { border-radius: var(--radius-full) !important; }
-
-/* Shadows */
-.shadow-none { box-shadow: none !important; }
-.shadow-sm { box-shadow: var(--shadow-sm) !important; }
-.shadow { box-shadow: var(--shadow-md) !important; }
-.shadow-lg { box-shadow: var(--shadow-lg) !important; }
-.shadow-xl { box-shadow: var(--shadow-xl) !important; }
-
-/* Transitions */
-.transition { transition: all var(--transition-normal) !important; }
-.transition-fast { transition: all var(--transition-fast) !important; }
-.transition-slow { transition: all var(--transition-slow) !important; }
-
-/* Overflow */
-.overflow-hidden { overflow: hidden !important; }
-.overflow-auto { overflow: auto !important; }
-.overflow-scroll { overflow: scroll !important; }
-.overflow-x-auto { overflow-x: auto !important; }
-.overflow-y-auto { overflow-y: auto !important; }
-
-/* Position */
-.relative { position: relative !important; }
-.absolute { position: absolute !important; }
-.fixed { position: fixed !important; }
-.sticky { position: sticky !important; }
-
-/* Width & Height */
-.w-full { width: 100% !important; }
-.h-full { height: 100% !important; }
-.min-h-screen { min-height: 100vh !important; }
-
-/* ============================================================================
-   FOCUS STYLES
-   ============================================================================ */
-
-/* Focus ring for interactive elements */
-.focus-ring:focus {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
-}
-
-/* Custom focus ring that matches design system */
-.focus-ring-inset:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px var(--color-primary);
-}
-
-/* ============================================================================
-   LOADING STATES
-   ============================================================================ */
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-@keyframes bounce {
-  0%, 100% {
-    transform: translateY(-25%);
-    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
-  }
-  50% {
-    transform: translateY(0);
-    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
-  }
-}
-
-.animate-spin {
-  animation: spin 1s linear infinite;
-}
-
-.animate-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-.animate-bounce {
-  animation: bounce 1s infinite;
-}
-
-/* ============================================================================
-   PRINT STYLES
-   ============================================================================ */
-
-@media print {
-  *,
-  *::before,
-  *::after {
-    background: transparent !important;
-    color: black !important;
-    box-shadow: none !important;
-    text-shadow: none !important;
-  }
-
-  a,
-  a:visited {
-    text-decoration: underline;
-  }
-
-  a[href]::after {
-    content: " (" attr(href) ")";
-  }
-
-  abbr[title]::after {
-    content: " (" attr(title) ")";
-  }
-
-  pre {
-    white-space: pre-wrap !important;
-  }
-
-  pre,
-  blockquote {
-    border: 1px solid #999;
-    page-break-inside: avoid;
-  }
-
-  thead {
-    display: table-header-group;
-  }
-
-  tr,
-  img {
-    page-break-inside: avoid;
-  }
-
-  p,
-  h2,
-  h3 {
-    orphans: 3;
-    widows: 3;
-  }
-
-  h2,
-  h3 {
-    page-break-after: avoid;
-  }
-} 
-
-/* Force font override - add at the very bottom */
-* {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
-}
-
-/* Theme overrides - add at the very end */
-.light-theme {
-  color: #1e293b !important;
-  background-color: #ffffff !important;
-}
-
-.dark-theme {
-  color: #f8fafc !important;
-  background-color: #0f172a !important;
-}
-
-.dark-theme * {
-  color: #f8fafc !important;
-}
-
-.light-theme * {
-  color: #1e293b !important;
-}
+module.exports = { createSampleData };
