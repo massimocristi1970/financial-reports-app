@@ -97,6 +97,41 @@ h2 { font-size: var(--font-size-2xl); }
 h3 { font-size: var(--font-size-xl); }
 h4 { font-size: var(--font-size-lg); }
 
+p {
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-4);
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  opacity: 0.8;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+input, textarea, select {
+  font-family: inherit;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+}
+
+/* Make sure all text uses theme colors */
+.admin-panel,
+.dashboard-container,
+.nav-item,
+.nav-link,
+.content-wrapper {
+  color: var(--text-primary);
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
