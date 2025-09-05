@@ -6,7 +6,9 @@ import { FilterProvider } from './contexts/FilterContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import Layout from './components/common/Layout';
 import LoadingSpinner from './components/common/LoadingSpinner';
+import './styles/globals.css';
 import './App.css';
+
 
 // Lazy load dashboard components for better performance
 const OverviewDashboard = lazy(() => import('./components/dashboards/OverviewDashboard'));
@@ -68,18 +70,9 @@ const AppErrorFallback = ({ error, resetErrorBoundary }) => (
 );
 
 function App() {
-  // ADD THE useEffect HERE, INSIDE THE App FUNCTION:
   useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    
-    const handleThemeChange = (e) => {
-      document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
-    };
-    
-    handleThemeChange(mediaQuery);
-    mediaQuery.addEventListener('change', handleThemeChange);
-    
-    return () => mediaQuery.removeEventListener('change', handleThemeChange);
+    // Import the CSS file that has the theme variables
+    import('./styles/globals.css');
   }, []);
 
   return (
@@ -90,7 +83,7 @@ function App() {
             <Router basename={process.env.NODE_ENV === 'production' ? '/dashboard' : ''}>
               <Layout>
                 <Routes>
-                  {/* ... all your routes stay the same ... */}
+                  {/* ... routes ... */}
                 </Routes>
               </Layout>
             </Router>
