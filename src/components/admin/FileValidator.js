@@ -1,4 +1,4 @@
-// src/components/admin/FileValidator.js - FINAL CLEAN VERSION
+// src/components/admin/FileValidator.js - Clean version with juddering fix
 import React, { useState, useEffect, useCallback } from 'react';
 import { REPORT_CONFIGS } from '../../config/reportConfig';
 import { COLUMN_MAPPINGS } from '../../utils/constants';
@@ -20,86 +20,47 @@ const FileValidator = ({
     details: null
   });
 
+  // Prevent juddering - only validate once per file/reportType combination
+  const [hasValidated, setHasValidated] = useState(false);
+
   // Helper function to validate UK date formats (DD/MM/YYYY, DD-MM-YYYY, etc.)
   const isValidUKDate = useCallback((dateString) => {
-    if (!dateString) return false;
+    if (!dateString || typeof dateString !== 'string') return false;
     
-    const strValue = String(dateString).trim();
-    if (strValue === '') return true;
-    
-    // UK date patterns: DD/MM/YYYY, DD-MM-YYYY, DD.MM.YYYY
+    const cleaned = dateString.trim();
     const ukDatePattern = /^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})$/;
-    const match = strValue.match(ukDatePattern);
+    const match = cleaned.match(ukDatePattern);
     
-    if (match) {
-      const [, day, month, year] = match;
-      const dayNum = parseInt(day, 10);
-      const monthNum = parseInt(month, 10);
-      const yearNum = parseInt(year, 10);
-      
-      // Basic range checks
-      if (dayNum < 1 || dayNum > 31) return false;
-      if (monthNum < 1 || monthNum > 12) return false;
-      if (yearNum < 1900 || yearNum > 2100) return false;
-      
-      // Create date object (month is 0-indexed in JS)
-      const dateObj = new Date(yearNum, monthNum - 1, dayNum);
-      const isValid = dateObj.getDate() === dayNum && 
-             dateObj.getMonth() === monthNum - 1 && 
-             dateObj.getFullYear() === yearNum;
-      
-      return isValid;
-    }
+    if (!match) return false;
     
-    // Try ISO date format as fallback
-    const isoDate = new Date(strValue);
-    const isValidIso = !isNaN(isoDate.getTime());
+    const [, day, month, year] = match;
+    const dayNum = parseInt(day, 10);
+    const monthNum = parseInt(month, 10);
+    const yearNum = parseInt(year, 10);
     
-    return isValidIso;
+    if (dayNum < 1 || dayNum > 31) return false;
+    if (monthNum < 1 || monthNum > 12) return false;
+    if (yearNum < 1900 || yearNum > 2100) return false;
+    
+    const dateObj = new Date(yearNum, monthNum - 1, dayNum);
+    return dateObj.getDate() === dayNum && 
+           dateObj.getMonth() === monthNum - 1 && 
+           dateObj.getFullYear() === yearNum;
   }, []);
 
-  // Helper function to validate currency values - SIMPLE VERSION THAT WORKS
+  // Helper function to validate currency values
   const isValidCurrency = useCallback((value) => {
-    if (!value) return false;
+    if (!value || typeof value !== 'string') return false;
     
-    const strValue = String(value).trim();
-    if (strValue === '') return true;
+    const cleaned = value.trim()
+      .replace(/[£$€¥]/g, '')
+      .replace(/,/g, '')
+      .replace(/\s/g, '');
     
-    // Simple approach: just check if there are any digits in the string
-    const hasDigits = /\d/.test(strValue);
-    
-    return hasDigits;
+    return !isNaN(parseFloat(cleaned)) && isFinite(parseFloat(cleaned));
   }, []);
 
-  // Helper function to parse currency value to number
-  const parseCurrency = useCallback((value) => {
-    if (!value) return 0;
-    
-    const strValue = String(value).trim();
-    
-    // Extract all digits from the string
-    const digits = strValue.match(/\d+/g);
-    if (digits) {
-      return parseFloat(digits.join('')) || 0;
-    }
-    
-    return 0;
-  }, []);
-
-  // Helper function to parse UK date to ISO format
-  const parseUKDate = useCallback((dateString) => {
-    const ukDatePattern = /^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})$/;
-    const match = dateString.trim().match(ukDatePattern);
-    
-    if (match) {
-      const [, day, month, year] = match;
-      return new Date(year, month - 1, day).toISOString().split('T')[0];
-    }
-    
-    return null;
-  }, []);
-
-  // Helper function to read file content
+  // Read file content
   const readFileContent = useCallback((file) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -109,16 +70,15 @@ const FileValidator = ({
     });
   }, []);
 
-  // Helper function to parse CSV using Papa Parse
-  const parseCSV = useCallback(async (content) => {
+  // Parse CSV with Papa Parse
+  const parseCSV = useCallback((content) => {
     return new Promise((resolve, reject) => {
       Papa.parse(content, {
         header: true,
         skipEmptyLines: true,
-        trimHeaders: true,
-        dynamicTyping: false, // Keep as strings for proper validation
-        transform: (value, header) => {
-          // Trim whitespace from all values
+        dynamicTyping: false,
+        delimitersToGuess: [',', '\t', ';', '|'],
+        transform: (value) => {
           return typeof value === 'string' ? value.trim() : value;
         },
         complete: (results) => {
@@ -127,7 +87,6 @@ const FileValidator = ({
             if (criticalErrors.length > 0) {
               reject(new Error(`CSV parsing error: ${criticalErrors[0].message}`));
             } else {
-              // Non-critical errors, continue with data
               resolve(results.data);
             }
           } else {
@@ -199,7 +158,6 @@ const FileValidator = ({
 
     csvData.forEach((row, index) => {
       Object.entries(reportConfig.fields).forEach(([fieldName, fieldConfig]) => {
-        // Find the actual CSV header that maps to this field
         const possibleColumns = COLUMN_MAPPINGS[fieldName] || [fieldName];
         const csvHeaders = Object.keys(row);
         const matchedVariation = possibleColumns.find(variation => 
@@ -208,21 +166,18 @@ const FileValidator = ({
           )
         );
 
-        if (!matchedVariation) return; // Field not found in CSV
+        if (!matchedVariation) return;
 
-        // Get the actual header name from CSV
         const csvHeaderName = csvHeaders.find(header => 
           header.toLowerCase().trim() === matchedVariation.toLowerCase().trim()
         );
 
         const value = row[csvHeaderName];
         
-        // Skip validation for empty optional fields
         if (!fieldConfig.required && (value === null || value === undefined || value === '')) {
           return;
         }
 
-        // Skip validation for empty required fields (already caught by structure validation)
         if (value === null || value === undefined || value === '') {
           return;
         }
@@ -230,10 +185,9 @@ const FileValidator = ({
         // Enhanced type checking with UK format support
         switch (fieldConfig.type) {
           case 'number':
-            // Handle numbers that might have commas
-            const cleanedNumber = typeof value === 'string' ? 
+            const cleanedNumber = typeof value === 'string' ?
               value.replace(/,/g, '').trim() : value;
-            if (isNaN(Number(cleanedNumber))) {
+            if (isNaN(parseFloat(cleanedNumber))) {
               errors.push({
                 type: 'TYPE_ERROR',
                 message: `Row ${index + 1}: '${csvHeaderName}' must be a number, got '${value}'`,
@@ -244,9 +198,8 @@ const FileValidator = ({
               });
             }
             break;
-          
+
           case 'currency':
-            // Use simple currency validation
             if (!isValidCurrency(value)) {
               errors.push({
                 type: 'TYPE_ERROR',
@@ -258,14 +211,12 @@ const FileValidator = ({
               });
             }
             break;
-          
+
           case 'date':
-          case 'datetime':
-            // Use UK date validation
             if (!isValidUKDate(value) && isNaN(Date.parse(value))) {
               errors.push({
                 type: 'TYPE_ERROR',
-                message: `Row ${index + 1}: '${csvHeaderName}' must be a valid date (DD/MM/YYYY format supported), got '${value}'`,
+                message: `Row ${index + 1}: '${csvHeaderName}' must be a valid date (DD/MM/YYYY or YYYY-MM-DD), got '${value}'`,
                 severity: 'error',
                 row: index + 1,
                 field: csvHeaderName,
@@ -290,7 +241,6 @@ const FileValidator = ({
             break;
 
           default:
-            // For string fields, just check they're not empty if required
             if (fieldConfig.required && (!value || value.toString().trim() === '')) {
               errors.push({
                 type: 'TYPE_ERROR',
@@ -314,6 +264,9 @@ const FileValidator = ({
     const errors = [];
     const warnings = [];
     
+    // Add any business-specific validation here
+    // For now, just return empty arrays
+    
     return { errors, warnings };
   }, []);
 
@@ -326,7 +279,7 @@ const FileValidator = ({
       warningCount: warnings.length,
       fileSize: file ? `${(file.size / 1024).toFixed(1)} KB` : 'Unknown',
       fileName: file ? file.name : 'Unknown',
-      sampleData: data.slice(0, 3), // First 3 rows for preview
+      sampleData: data.slice(0, 3),
       detectedColumns: data.length > 0 ? Object.keys(data[0]) : []
     };
   }, [file]);
@@ -388,7 +341,7 @@ const FileValidator = ({
         warnings: allWarnings,
         summary,
         details: {
-          csvData: csvData.slice(0, 5), // First 5 rows for debugging
+          csvData: csvData.slice(0, 5),
           reportConfig
         }
       };
@@ -437,15 +390,22 @@ const FileValidator = ({
     }
   }, [file, reportType, readFileContent, parseCSV, validateCSVStructure, validateDataTypes, validateBusinessRules, generateValidationSummary, onValidation]);
 
-  // Auto-validate when file or report type changes
+  // Fixed auto-validation to prevent juddering - only validate once per file/reportType
   useEffect(() => {
-    if (autoValidate && file && reportType) {
+    if (autoValidate && file && reportType && !hasValidated) {
       validateFile();
+      setHasValidated(true);
     }
-  }, [file, reportType, autoValidate, validateFile]);
+  }, [file, reportType, autoValidate, hasValidated, validateFile]);
+
+  // Reset validation flag when file or reportType changes
+  useEffect(() => {
+    setHasValidated(false);
+  }, [file, reportType]);
 
   // Manual validation trigger
   const triggerValidation = () => {
+    setHasValidated(false);
     validateFile();
   };
 
