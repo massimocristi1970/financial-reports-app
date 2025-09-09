@@ -16,7 +16,7 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 1. **Clone the repository**
 ```bash
 git clone <repository-url>
-cd financial-reports-app
+cd C:\Dev\GitHub\financial-reports-app
 ```
 
 2. **Install dependencies**
