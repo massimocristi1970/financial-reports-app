@@ -200,7 +200,16 @@ const FileValidator = ({
             break;
 
           case 'currency':
-            if (!isValidCurrency(value)) {
+            // More flexible currency validation
+            const stringValue = typeof value === 'string' ? value : String(value);
+            const cleanedCurrency = stringValue.trim()
+              .replace(/[£$€¥�]/g, '') // Include � for encoding issues
+              .replace(/,/g, '')
+              .replace(/\s/g, '')
+              .replace(/[^\d.-]/g, ''); // Remove any non-numeric characters
+            
+            const currencyNumber = parseFloat(cleanedCurrency);
+            if (isNaN(currencyNumber) || !isFinite(currencyNumber)) {
               errors.push({
                 type: 'TYPE_ERROR',
                 message: `Row ${index + 1}: '${csvHeaderName}' must be a valid currency amount, got '${value}'`,
