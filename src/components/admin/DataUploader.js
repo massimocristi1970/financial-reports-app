@@ -205,6 +205,16 @@ const DataUploader = ({
         uploadedAt: new Date().toISOString()
       });
 
+      // Force refresh of the data in dashboard
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('data-uploaded', {
+          detail: { 
+            reportType: uploadState.reportType, 
+            recordCount: csvData.length 
+          }
+        }));
+      }, 500);
+
     } catch (error) {
       console.error('Upload error:', error);
       setUploadState(prev => ({
