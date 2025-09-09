@@ -166,6 +166,16 @@ const DataUploader = ({
         });
       }
 
+      // Ensure all records have required IndexedDB fields
+      if (Array.isArray(csvData)) {
+        csvData = csvData.map((row, index) => ({
+          ...row,
+          _id: row._id || `${uploadState.reportType}_${Date.now()}_${index}`,
+          _processed_date: row._processed_date || new Date().toISOString(),
+          date: row.date || row.stage_date || row.funded_date || new Date().toISOString().split('T')[0]
+        }));
+      }
+
       if (!Array.isArray(csvData) || csvData.length === 0) {
         throw new Error('Invalid CSV data format or empty file');
       }
