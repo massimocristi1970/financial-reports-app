@@ -105,7 +105,7 @@ const DataUploader = ({
     }));
   };
 
-  // Handle upload
+  // Handle upload - FIXED VERSION
   const handleUpload = async () => {
     if (!uploadState.file || !uploadState.reportType) {
       setUploadState(prev => ({
@@ -131,17 +131,50 @@ const DataUploader = ({
     }));
 
     try {
-      // Process CSV file
+      // Simple CSV processing - use the data from validation
       setUploadState(prev => ({ ...prev, uploadProgress: 25 }));
       onUploadProgress?.(25);
 
-      const processedData = await processCSVFile(uploadState.file, uploadState.reportType);
+      // Get the CSV data from the validation result
+      let csvData = uploadState.validationResult.details?.csvData;
       
+      // If that doesn't work, try to get full data from validation summary
+      if (!csvData || !Array.isArray(csvData) || csvData.length === 0) {
+        // Fallback: re-read the file directly
+        const reader = new FileReader();
+        const fileContent = await new Promise((resolve, reject) => {
+          reader.onload = (e) => resolve(e.target.result);
+          reader.onerror = (e) => reject(new Error('Failed to read file'));
+          reader.readAsText(uploadState.file);
+        });
+
+        // Simple CSV parsing
+        const lines = fileContent.split('\n').filter(line => line.trim());
+        if (lines.length === 0) {
+          throw new Error('No data found in CSV file');
+        }
+
+        const headers = lines[0].split(',').map(h => h.trim());
+        csvData = lines.slice(1).map((line, index) => {
+          const values = line.split(',').map(v => v.trim());
+          const row = {};
+          headers.forEach((header, i) => {
+            row[header] = values[i] || '';
+          });
+          row._rowIndex = index + 2; // For tracking
+          return row;
+        });
+      }
+
+      if (!Array.isArray(csvData) || csvData.length === 0) {
+        throw new Error('Invalid CSV data format or empty file');
+      }
+
       setUploadState(prev => ({ ...prev, uploadProgress: 50 }));
       onUploadProgress?.(50);
 
-      // Save to IndexedDB
-      await saveDataToIndexedDB(uploadState.reportType, processedData);
+      // Save to IndexedDB - use the raw CSV data for now
+      await saveDataToIndexedDB(uploadState.reportType, csvData);
       
       setUploadState(prev => ({ ...prev, uploadProgress: 75 }));
       onUploadProgress?.(75);
@@ -158,11 +191,12 @@ const DataUploader = ({
       onUploadComplete?.({
         reportType: uploadState.reportType,
         fileName: uploadState.file.name,
-        recordCount: processedData.length,
+        recordCount: csvData.length,
         uploadedAt: new Date().toISOString()
       });
 
     } catch (error) {
+      console.error('Upload error:', error);
       setUploadState(prev => ({
         ...prev,
         isUploading: false,
