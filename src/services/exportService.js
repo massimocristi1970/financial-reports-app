@@ -1,69 +1,84 @@
-// src/services/exportService.js
-import * as XLSX from 'xlsx';
-import { formatters } from '../utils/formatters';
-import { REPORT_TYPES, EXPORT_FORMATS } from '../utils/constants';
+import ExcelJS from 'exceljs';
 
 class ExportService {
   constructor() {
-    this.exportQueue = [];
-    this.isProcessing = false;
-    this.progressCallbacks = new Map();
+    this.supportedFormats = ['json', 'csv', 'excel', 'xlsx'];
+    this.maxFileSize = 50 * 1024 * 1024; // 50MB limit
   }
 
-  // Export data to CSV format
-  async exportToCSV(data, options = {}) {
-    try {
-      const {
-        filename = 'export.csv',
-        headers = null,
-        delimiter = ',',
-        includeHeaders = true,
-        reportType = null
-      } = options;
-
-      // Validate data
-      if (!Array.isArray(data) || data.length === 0) {
-        throw new Error('No data available for export');
-      }
-
-      // Prepare headers
-      const finalHeaders = headers || Object.keys(data[0]);
-      
-      // Format data rows
-      const formattedData = data.map(row => 
-        finalHeaders.map(header => {
-          const value = row[header];
-          return this.formatCellValue(value, header, reportType);
-        })
-      );
-
-      // Build CSV content
-      let csvContent = '';
-      
-      if (includeHeaders) {
-        csvContent += finalHeaders.map(header => this.escapeCSVValue(header)).join(delimiter) + '\n';
-      }
-      
-      csvContent += formattedData
-        .map(row => row.map(cell => this.escapeCSVValue(cell)).join(delimiter))
-        .join('\n');
-
-      // Create and download file
-      await this.downloadFile(csvContent, filename, 'text/csv');
-
-      return {
-        success: true,
-        filename,
-        recordCount: data.length,
-        format: 'CSV'
-      };
-    } catch (error) {
-      console.error('CSV export error:', error);
-      throw new Error(`CSV export failed: ${error.message}`);
+  // Validate export data
+  validateData(data, format) {
+    if (!data) {
+      throw new Error('No data provided for export');
     }
+
+    if (!this.supportedFormats.includes(format.toLowerCase())) {
+      throw new Error(`Unsupported format: ${format}`);
+    }
+
+    // Size validation for large datasets
+    const dataSize = JSON.stringify(data).length;
+    if (dataSize > this.maxFileSize) {
+      throw new Error(`Data size exceeds maximum limit of ${this.maxFileSize / (1024 * 1024)}MB`);
+    }
+
+    return true;
   }
 
-  // Export data to Excel format
+  // Format cell values for Excel
+  formatCellValue(value, columnKey = '', reportType = null) {
+    if (value === null || value === undefined) {
+      return '';
+    }
+
+    // Handle dates
+    if (value instanceof Date) {
+      return value;
+    }
+
+    // Handle date strings
+    if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}/.test(value)) {
+      const date = new Date(value);
+      if (!isNaN(date.getTime())) {
+        return date;
+      }
+    }
+
+    // Handle numbers
+    if (typeof value === 'number') {
+      return value;
+    }
+
+    // Handle booleans
+    if (typeof value === 'boolean') {
+      return value;
+    }
+
+    // Handle arrays and objects
+    if (typeof value === 'object') {
+      return JSON.stringify(value);
+    }
+
+    return String(value);
+  }
+
+  // Download blob helper
+  async downloadBlob(blob, filename) {
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    URL.revokeObjectURL(url);
+  }
+
+  // Export data to Excel format using ExcelJS
   async exportToExcel(data, options = {}) {
     try {
       const {
@@ -71,8 +86,11 @@ class ExportService {
         sheetName = 'Data',
         includeHeaders = true,
         reportType = null,
-        multiSheet = false
+        multiSheet = false,
+        styling = true
       } = options;
+
+      this.validateData(data, 'excel');
 
       // Handle multi-sheet export
       if (multiSheet && typeof data === 'object' && !Array.isArray(data)) {
@@ -85,18 +103,52 @@ class ExportService {
       }
 
       // Create workbook and worksheet
-      const workbook = XLSX.utils.book_new();
-      const worksheet = this.createWorksheet(data, { includeHeaders, reportType });
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet(sheetName);
+
+      // Get headers from first row
+      const headers = Object.keys(data[0]);
       
-      // Add worksheet to workbook
-      XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+      if (includeHeaders) {
+        // Add header row
+        worksheet.addRow(headers);
+        
+        if (styling) {
+          // Style header row
+          const headerRow = worksheet.getRow(1);
+          headerRow.font = { bold: true };
+          headerRow.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFE0E0E0' }
+          };
+          
+          // Set column widths
+          headers.forEach((header, index) => {
+            const column = worksheet.getColumn(index + 1);
+            column.width = Math.max(header.length + 2, 12);
+          });
+        }
+      }
 
-      // Apply styling if supported
-      this.applyExcelStyling(workbook, worksheet, reportType);
+      // Add data rows
+      data.forEach(row => {
+        const rowData = headers.map(header => 
+          this.formatCellValue(row[header], header, reportType)
+        );
+        worksheet.addRow(rowData);
+      });
 
-      // Generate Excel file
-      const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-      const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      // Apply additional styling if enabled
+      if (styling) {
+        this.applyExcelStyling(worksheet, reportType);
+      }
+
+      // Generate Excel buffer
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+      });
       
       await this.downloadBlob(blob, filename);
 
@@ -116,29 +168,60 @@ class ExportService {
   // Export multiple sheets to Excel
   async exportMultiSheetExcel(sheetsData, options = {}) {
     try {
-      const { filename = 'multi-report.xlsx' } = options;
-      const workbook = XLSX.utils.book_new();
+      const { 
+        filename = 'multi-report.xlsx',
+        styling = true 
+      } = options;
+      
+      const workbook = new ExcelJS.Workbook();
       let totalRecords = 0;
 
       for (const [sheetName, sheetData] of Object.entries(sheetsData)) {
         if (Array.isArray(sheetData) && sheetData.length > 0) {
-          const worksheet = this.createWorksheet(sheetData, {
-            includeHeaders: true,
-            reportType: sheetName
-          });
+          const worksheet = workbook.addWorksheet(this.sanitizeSheetName(sheetName));
           
-          XLSX.utils.book_append_sheet(workbook, worksheet, this.sanitizeSheetName(sheetName));
+          // Get headers
+          const headers = Object.keys(sheetData[0]);
+          
+          // Add header row
+          worksheet.addRow(headers);
+          
+          // Style headers
+          if (styling) {
+            const headerRow = worksheet.getRow(1);
+            headerRow.font = { bold: true };
+            headerRow.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: 'FFE0E0E0' }
+            };
+          }
+          
+          // Add data rows
+          sheetData.forEach(row => {
+            const rowData = headers.map(header => 
+              this.formatCellValue(row[header], header, sheetName)
+            );
+            worksheet.addRow(rowData);
+          });
+
+          if (styling) {
+            this.applyExcelStyling(worksheet, sheetName);
+          }
+          
           totalRecords += sheetData.length;
         }
       }
 
-      if (workbook.SheetNames.length === 0) {
+      if (workbook.worksheets.length === 0) {
         throw new Error('No valid data sheets to export');
       }
 
-      // Generate Excel file
-      const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-      const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      // Generate Excel buffer
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+      });
       
       await this.downloadBlob(blob, filename);
 
@@ -147,12 +230,78 @@ class ExportService {
         filename,
         recordCount: totalRecords,
         format: 'Excel',
-        sheets: workbook.SheetNames.length
+        sheets: workbook.worksheets.length
       };
     } catch (error) {
       console.error('Multi-sheet Excel export error:', error);
       throw new Error(`Multi-sheet Excel export failed: ${error.message}`);
     }
+  }
+
+  // Apply Excel styling
+  applyExcelStyling(worksheet, reportType = null) {
+    try {
+      // Auto-fit columns
+      worksheet.columns.forEach(column => {
+        let maxLength = 0;
+        column.eachCell({ includeEmpty: false }, cell => {
+          const cellLength = cell.value ? cell.value.toString().length : 0;
+          if (cellLength > maxLength) {
+            maxLength = cellLength;
+          }
+        });
+        column.width = Math.min(Math.max(maxLength + 2, 12), 50);
+      });
+
+      // Apply borders to all cells with data
+      const range = worksheet.actualCellCount;
+      if (range) {
+        worksheet.eachRow((row, rowNumber) => {
+          row.eachCell((cell) => {
+            cell.border = {
+              top: { style: 'thin' },
+              left: { style: 'thin' },
+              bottom: { style: 'thin' },
+              right: { style: 'thin' }
+            };
+          });
+        });
+      }
+
+      // Apply number formatting for numeric columns
+      worksheet.eachRow((row, rowNumber) => {
+        if (rowNumber > 1) { // Skip header row
+          row.eachCell((cell, colNumber) => {
+            if (typeof cell.value === 'number') {
+              // Check if it's a currency or percentage column
+              const header = worksheet.getRow(1).getCell(colNumber).value;
+              if (header && typeof header === 'string') {
+                if (header.toLowerCase().includes('price') || 
+                    header.toLowerCase().includes('cost') ||
+                    header.toLowerCase().includes('amount')) {
+                  cell.numFmt = '"$"#,##0.00';
+                } else if (header.toLowerCase().includes('percent') || 
+                          header.toLowerCase().includes('rate')) {
+                  cell.numFmt = '0.00%';
+                } else {
+                  cell.numFmt = '#,##0.00';
+                }
+              }
+            }
+          });
+        }
+      });
+
+    } catch (error) {
+      console.warn('Styling application failed:', error.message);
+    }
+  }
+
+  // Sanitize sheet name for Excel
+  sanitizeSheetName(name) {
+    return name
+      .replace(/[\\\/\[\]:*?]/g, '_')
+      .substring(0, 31);
   }
 
   // Export data to JSON format
@@ -164,10 +313,7 @@ class ExportService {
         metadata = null
       } = options;
 
-      // Validate data
-      if (!data) {
-        throw new Error('No data available for export');
-      }
+      this.validateData(data, 'json');
 
       // Prepare export object
       const exportData = {
@@ -183,14 +329,18 @@ class ExportService {
 
       // Convert to JSON string
       const jsonContent = JSON.stringify(exportData, null, pretty ? 2 : 0);
-
+      
       // Create and download file
-      await this.downloadFile(jsonContent, filename, 'application/json');
+      const blob = new Blob([jsonContent], { 
+        type: 'application/json;charset=utf-8;' 
+      });
+      
+      await this.downloadBlob(blob, filename);
 
       return {
         success: true,
         filename,
-        recordCount: exportData.recordCount,
+        recordCount: Array.isArray(data) ? data.length : Object.keys(data).length,
         format: 'JSON'
       };
     } catch (error) {
@@ -199,109 +349,98 @@ class ExportService {
     }
   }
 
-  // Export chart as image
-  async exportChartImage(chartRef, options = {}) {
+  // Export data to CSV format
+  async exportToCSV(data, options = {}) {
     try {
       const {
-        filename = 'chart.png',
-        format = 'png',
-        quality = 0.9,
-        backgroundColor = '#ffffff'
+        filename = 'export.csv',
+        delimiter = ',',
+        includeHeaders = true
       } = options;
 
-      if (!chartRef || !chartRef.current) {
-        throw new Error('Chart reference not available');
+      this.validateData(data, 'csv');
+
+      if (!Array.isArray(data) || data.length === 0) {
+        throw new Error('No data available for CSV export');
       }
 
-      // Get chart canvas
-      const canvas = chartRef.current.canvas || chartRef.current.querySelector('canvas');
-      if (!canvas) {
-        throw new Error('Chart canvas not found');
+      const headers = Object.keys(data[0]);
+      let csvContent = '';
+
+      // Add headers
+      if (includeHeaders) {
+        csvContent += headers.join(delimiter) + '\n';
       }
 
-      // Create a new canvas with background color
-      const exportCanvas = document.createElement('canvas');
-      const ctx = exportCanvas.getContext('2d');
-      
-      exportCanvas.width = canvas.width;
-      exportCanvas.height = canvas.height;
-
-      // Fill background
-      ctx.fillStyle = backgroundColor;
-      ctx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
-
-      // Draw chart
-      ctx.drawImage(canvas, 0, 0);
-
-      // Convert to blob
-      return new Promise((resolve, reject) => {
-        exportCanvas.toBlob(async (blob) => {
-          try {
-            await this.downloadBlob(blob, filename);
-            resolve({
-              success: true,
-              filename,
-              format: format.toUpperCase(),
-              dimensions: {
-                width: exportCanvas.width,
-                height: exportCanvas.height
-              }
-            });
-          } catch (error) {
-            reject(error);
+      // Add data rows
+      data.forEach(row => {
+        const rowData = headers.map(header => {
+          let value = row[header];
+          
+          // Handle nulls and undefined
+          if (value === null || value === undefined) {
+            return '';
           }
-        }, `image/${format}`, quality);
+          
+          // Convert objects to JSON strings
+          if (typeof value === 'object') {
+            value = JSON.stringify(value);
+          }
+          
+          // Escape quotes and wrap in quotes if needed
+          value = String(value);
+          if (value.includes(delimiter) || value.includes('"') || value.includes('\n')) {
+            value = `"${value.replace(/"/g, '""')}"`;
+          }
+          
+          return value;
+        });
+        
+        csvContent += rowData.join(delimiter) + '\n';
       });
+
+      // Create and download file
+      const blob = new Blob([csvContent], { 
+        type: 'text/csv;charset=utf-8;' 
+      });
+      
+      await this.downloadBlob(blob, filename);
+
+      return {
+        success: true,
+        filename,
+        recordCount: data.length,
+        format: 'CSV'
+      };
     } catch (error) {
-      console.error('Chart image export error:', error);
-      throw new Error(`Chart image export failed: ${error.message}`);
+      console.error('CSV export error:', error);
+      throw new Error(`CSV export failed: ${error.message}`);
     }
   }
 
-  // Export filtered data with applied filters info
-  async exportFilteredData(data, filters, options = {}) {
-    try {
-      const {
-        format = 'csv',
-        includeFilterInfo = true,
-        reportType = null
-      } = options;
-
-      // Prepare metadata about applied filters
-      const filterMetadata = includeFilterInfo ? {
-        appliedFilters: filters,
-        exportDate: new Date().toISOString(),
-        originalRecordCount: data.originalCount || data.length,
-        filteredRecordCount: data.length
-      } : null;
-
-      // Choose export method based on format
-      switch (format.toLowerCase()) {
-        case 'csv':
-          return await this.exportToCSV(data, { ...options, reportType });
-        case 'excel':
-        case 'xlsx':
-          return await this.exportToExcel(data, { ...options, reportType });
-        case 'json':
-          return await this.exportToJSON(data, { 
-            ...options, 
-            metadata: filterMetadata 
-          });
-        default:
-          throw new Error(`Unsupported export format: ${format}`);
-      }
-    } catch (error) {
-      console.error('Filtered data export error:', error);
-      throw new Error(`Filtered data export failed: ${error.message}`);
+  // Generic export method
+  async export(data, format, options = {}) {
+    const normalizedFormat = format.toLowerCase();
+    
+    switch (normalizedFormat) {
+      case 'excel':
+      case 'xlsx':
+        return await this.exportToExcel(data, options);
+      case 'json':
+        return await this.exportToJSON(data, options);
+      case 'csv':
+        return await this.exportToCSV(data, options);
+      default:
+        throw new Error(`Unsupported export format: ${format}`);
     }
   }
 
-  // Batch export multiple reports
+  // Batch export multiple datasets
   async batchExport(exportJobs, options = {}) {
     try {
       const {
-        progressCallback = null,
-        continueOnError = true
+        continueOnError = true,
+        progressCallback = null
       } = options;
 
       const results = [];
@@ -309,45 +448,27 @@ class ExportService {
 
       for (const job of exportJobs) {
         try {
-          // Update progress
           if (progressCallback) {
             progressCallback({
               current: completedJobs,
               total: exportJobs.length,
-              currentJob: job.name || job.reportType
+              currentJob: job
             });
           }
 
-          // Execute export job
-          let result;
-          switch (job.format.toLowerCase()) {
-            case 'csv':
-              result = await this.exportToCSV(job.data, job.options);
-              break;
-            case 'excel':
-            case 'xlsx':
-              result = await this.exportToExcel(job.data, job.options);
-              break;
-            case 'json':
-              result = await this.exportToJSON(job.data, job.options);
-              break;
-            default:
-              throw new Error(`Unsupported format: ${job.format}`);
-          }
-
-          results.push({
-            job: job.name || job.reportType,
-            ...result
-          });
-
+          const result = await this.export(job.data, job.format, job.options || {});
+          results.push(result);
           completedJobs++;
-        } catch (error) {
-          const errorResult = {
-            job: job.name || job.reportType,
-            success: false,
-            error: error.message
-          };
 
+        } catch (error) {
+          console.error(`Batch export job failed:`, error);
+          
+          const errorResult = {
+            success: false,
+            error: error.message,
+            job: job
+          };
+          
           results.push(errorResult);
 
           if (!continueOnError) {
@@ -378,197 +499,6 @@ class ExportService {
       throw new Error(`Batch export failed: ${error.message}`);
     }
   }
-
-  // Helper method to create worksheet
-  createWorksheet(data, options = {}) {
-    const { includeHeaders = true, reportType = null } = options;
-
-    // Format data for Excel
-    const formattedData = data.map(row => {
-      const formattedRow = {};
-      for (const [key, value] of Object.entries(row)) {
-        formattedRow[key] = this.formatCellValue(value, key, reportType);
-      }
-      return formattedRow;
-    });
-
-    // Create worksheet
-    const worksheet = XLSX.utils.json_to_sheet(formattedData, {
-      header: includeHeaders ? Object.keys(data[0]) : undefined
-    });
-
-    // Set column widths
-    const columnWidths = this.calculateColumnWidths(data);
-    worksheet['!cols'] = columnWidths;
-
-    return worksheet;
-  }
-
-  // Apply Excel styling
-  applyExcelStyling(workbook, worksheet, reportType) {
-    // Basic styling - this would need a more advanced Excel library for full styling
-    if (worksheet['!ref']) {
-      const range = XLSX.utils.decode_range(worksheet['!ref']);
-      
-      // Style header row
-      for (let col = range.s.c; col <= range.e.c; col++) {
-        const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
-        if (worksheet[cellAddress]) {
-          worksheet[cellAddress].s = {
-            font: { bold: true },
-            fill: { fgColor: { rgb: 'CCCCCC' } }
-          };
-        }
-      }
-    }
-  }
-
-  // Calculate optimal column widths
-  calculateColumnWidths(data) {
-    if (!data.length) return [];
-
-    const widths = {};
-    const headers = Object.keys(data[0]);
-
-    // Initialize with header lengths
-    headers.forEach(header => {
-      widths[header] = header.length;
-    });
-
-    // Check data lengths
-    data.forEach(row => {
-      headers.forEach(header => {
-        const cellValue = String(row[header] || '');
-        widths[header] = Math.max(widths[header], cellValue.length);
-      });
-    });
-
-    // Convert to Excel format and cap at reasonable max width
-    return headers.map(header => ({
-      wch: Math.min(Math.max(widths[header], 10), 50)
-    }));
-  }
-
-  // Format cell value based on column type
-  formatCellValue(value, columnName, reportType) {
-    if (value === null || value === undefined) {
-      return '';
-    }
-
-    // Date formatting
-    if (columnName.includes('date') || columnName.includes('Date')) {
-      return formatters.formatDate(value);
-    }
-
-    // Currency formatting
-    if (columnName.includes('amount') || columnName.includes('value') || 
-        columnName.includes('price') || columnName.includes('cost')) {
-      const numValue = parseFloat(value);
-      return isNaN(numValue) ? value : formatters.formatCurrency(numValue);
-    }
-
-    // Percentage formatting
-    if (columnName.includes('rate') || columnName.includes('percent')) {
-      const numValue = parseFloat(value);
-      return isNaN(numValue) ? value : formatters.formatPercent(numValue);
-    }
-
-    // Number formatting
-    if (typeof value === 'number') {
-      return formatters.formatNumber(value);
-    }
-
-    return String(value);
-  }
-
-  // Escape CSV values
-  escapeCSVValue(value) {
-    const stringValue = String(value);
-    
-    // If value contains comma, quote, or newline, wrap in quotes and escape quotes
-    if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
-      return `"${stringValue.replace(/"/g, '""')}"`;
-    }
-    
-    return stringValue;
-  }
-
-  // Sanitize sheet names for Excel
-  sanitizeSheetName(name) {
-    // Excel sheet name restrictions
-    return name
-      .replace(/[\/\\\?\*\[\]]/g, '_') // Replace invalid characters
-      .substring(0, 31); // Max length 31 characters
-  }
-
-  // Download file helper
-  async downloadFile(content, filename, mimeType) {
-    const blob = new Blob([content], { type: mimeType });
-    await this.downloadBlob(blob, filename);
-  }
-
-  // Download blob helper
-  async downloadBlob(blob, filename) {
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    
-    link.href = url;
-    link.download = filename;
-    link.style.display = 'none';
-    
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    // Clean up object URL
-    setTimeout(() => URL.revokeObjectURL(url), 100);
-  }
-
-  // Get supported export formats
-  getSupportedFormats() {
-    return [
-      { value: 'csv', label: 'CSV', extension: '.csv' },
-      { value: 'excel', label: 'Excel', extension: '.xlsx' },
-      { value: 'json', label: 'JSON', extension: '.json' }
-    ];
-  }
-
-  // Validate export options
-  validateExportOptions(data, format, options = {}) {
-    const errors = [];
-
-    // Check data
-    if (!data || (Array.isArray(data) && data.length === 0)) {
-      errors.push('No data available for export');
-    }
-
-    // Check format
-    const supportedFormats = ['csv', 'excel', 'xlsx', 'json'];
-    if (!supportedFormats.includes(format.toLowerCase())) {
-      errors.push(`Unsupported export format: ${format}`);
-    }
-
-    // Check filename
-    if (options.filename && !/^[^<>:"/\\|?*]+$/.test(options.filename)) {
-      errors.push('Invalid characters in filename');
-    }
-
-    return {
-      isValid: errors.length === 0,
-      errors
-    };
-  }
-
-  // Get export statistics
-  getExportStats() {
-    return {
-      queueSize: this.exportQueue.length,
-      isProcessing: this.isProcessing,
-      supportedFormats: this.getSupportedFormats()
-    };
-  }
 }
 
-// Create and export singleton instance
-const exportService = new ExportService();
-export default exportService; 
+export default new ExportService();
